@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Service\StoreConfig:
+        arguments:
+            $name: '%env(STORE_NAME)%'
+            $slogan: '%env(STORE_SLOGAN)%'
+            $domain: '%env(STORE_DOMAIN)%'
+            $defaultMetaDescription: '%env(STORE_DEFAULT_META_DESCRIPTION)%'
+            $email: '%env(STORE_EMAIL)%'
+            $phone: '%env(STORE_PHONE)%'
+            $logoPath: '%env(THEME_LOGO_PATH)%'
+            $faviconPath: '%env(THEME_FAVICON_PATH)%'
+            $adsenseClientId: '%env(GOOGLE_ADSENSE_CLIENT_ID)%'
+            $googleAdsConversionId: '%env(GOOGLE_ADS_CONVERSION_ID)%'
+            $googleAnalyticsId: '%env(GOOGLE_ANALYTICS_ID)%'
+            $themeColors: !service
+                class: App\ValueObject\ThemeColors
+                arguments:
+                    $bg: '%env(THEME_COLOR_BG)%'
+                    $surface: '%env(THEME_COLOR_SURFACE)%'
+                    $text: '%env(THEME_COLOR_TEXT)%'
+                    $textMuted: '%env(THEME_COLOR_TEXT_MUTED)%'
+                    $accent: '%env(THEME_COLOR_ACCENT)%'
+                    $accentStrong: '%env(THEME_COLOR_ACCENT_STRONG)%'

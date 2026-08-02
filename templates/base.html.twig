@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="{% block meta_description %}{{ store.defaultMetaDescription }}{% endblock %}">
+        <title>{% block title %}{{ store.name }}{% endblock %}</title>
+        {% if store.faviconPath %}
+            <link rel="icon" href="{{ store.faviconPath }}">
+        {% endif %}
+
+        <style>
+            :root {
+                --color-bg: {{ store.themeColors.bg }};
+                --color-surface: {{ store.themeColors.surface }};
+                --color-text: {{ store.themeColors.text }};
+                --color-text-muted: {{ store.themeColors.textMuted }};
+                --color-accent: {{ store.themeColors.accent }};
+                --color-accent-strong: {{ store.themeColors.accentStrong }};
+            }
+
+            body {
+                background: var(--color-bg);
+                color: var(--color-text);
+            }
+        </style>
+
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+
+        {% if store.googleAnalyticsId %}
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{ store.googleAnalyticsId }}"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ store.googleAnalyticsId }}');
+            </script>
+        {% endif %}
+        {% if store.adsenseClientId %}
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ store.adsenseClientId }}" crossorigin="anonymous"></script>
+        {% endif %}
+
+        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+        {% if frankenphp_hot_reload %}
+        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
+        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+        {% endif %}
+    </head>
+    <body>
+        <header>
+            <a href="{{ path('app_home') }}" class="logo">
+                {% if store.logoPath %}
+                    <img src="{{ store.logoPath }}" alt="{{ store.name }}">
+                {% else %}
+                    <span class="logo-text">{{ store.name }}</span>
+                {% endif %}
+            </a>
+            {% if store.slogan %}
+                <p class="slogan">{{ store.slogan }}</p>
+            {% endif %}
+            <nav class="account-nav">
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path('app_account') }}">Cont</a>
+                    <a href="{{ path('app_logout') }}">Deconectare</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}">Autentificare</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <main>
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>{{ store.name }}</p>
+            {% if store.email %}<p><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>{% endif %}
+            {% if store.phone %}<p>{{ store.phone }}</p>{% endif %}
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contul meu — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Contul meu</h1>
+    <p>Salut, {{ app.user.firstName }}!</p>
+{% endblock %}
