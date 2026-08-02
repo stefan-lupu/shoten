@@ -1,0 +1,8 @@
+<article class="product-card">
+    <a href="{{ path('app_product_show', { slug: product.slug }) }}">
+        <h3>{{ product.name }}</h3>
+        <p class="product-card__price">{{ product.price }} lei</p>
+        <p class="product-card__origin">Origine: {{ product.origin }}</p>
+        {% include 'product/_stock_badge.html.twig' %}
+    </a>
+</article>

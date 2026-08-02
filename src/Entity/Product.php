@@ -62,6 +62,7 @@ class Product
      * @var Collection<int, ProductImage>
      */
     #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $images;
 
     public function __construct()

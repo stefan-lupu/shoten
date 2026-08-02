@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.metaTitle|default(product.name) }} — {{ store.name }}{% endblock %}
+{% block meta_description %}{{ product.metaDescription|default(store.defaultMetaDescription) }}{% endblock %}
+
+{% block body %}
+    <nav class="breadcrumb">
+        <a href="{{ path('app_home') }}">Acasă</a> &gt;
+        <a href="{{ path('app_category_show', { slug: product.category.slug }) }}">{{ product.category.name }}</a> &gt;
+        {{ product.name }}
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-gallery">
+            {% for image in product.images %}
+                <img src="{{ asset('images/products/' ~ image.filename) }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="product-gallery__placeholder">Fără imagine</div>
+            {% endfor %}
+        </div>
+
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            {% include 'product/_stock_badge.html.twig' %}
+            <p class="product-detail__price">{{ product.price }} lei</p>
+            <p class="product-detail__origin">Origine: {{ product.origin }}</p>
+            <p>{{ product.description }}</p>
+        </div>
+    </div>
+{% endblock %}

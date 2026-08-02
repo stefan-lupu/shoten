@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -44,5 +45,20 @@ class ProductRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function paginateByCategorySlug(string $slug, int $page, int $perPage = 12): Paginator
+    {
+        $query = $this->createQueryBuilder('p')
+            ->join('p.category', 'c')
+            ->andWhere('c.slug = :slug')
+            ->setParameter('slug', $slug)
+            ->orderBy('p.name', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+        ;
+
+        return new Paginator($query);
     }
 }

@@ -1,0 +1,5 @@
+{% if product.stockStatus.value == 'in_stock' %}
+    <span class="stock-badge stock-badge--in-stock">În stoc</span>
+{% else %}
+    <span class="stock-badge stock-badge--on-order">La comandă, ~{{ product.estimatedDays }} zile</span>
+{% endif %}

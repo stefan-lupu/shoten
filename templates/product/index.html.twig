@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Produse recente</h1>
+
+    <div class="product-grid">
+        {% for product in products %}
+            {% include 'product/_card.html.twig' %}
+        {% else %}
+            <p>Nu există încă produse în catalog.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
