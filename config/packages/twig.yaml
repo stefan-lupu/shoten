@@ -2,6 +2,7 @@ twig:
     file_name_pattern: '*.twig'
     globals:
         store: '@App\Service\StoreConfig'
+        cart_manager: '@App\Service\CartManager'
 
 when@test:
     twig:
