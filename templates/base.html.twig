@@ -115,9 +115,16 @@
         </main>
 
         <footer class="container py-4 mt-4 border-top text-body-secondary">
-            <p class="mb-1">{{ store.name }}</p>
-            {% if store.email %}<p class="mb-1"><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>{% endif %}
-            {% if store.phone %}<p class="mb-0">{{ store.phone }}</p>{% endif %}
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1">{{ store.name }}</p>
+                    {% if store.email %}<p class="mb-1"><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>{% endif %}
+                    {% if store.phone %}<p class="mb-0">{{ store.phone }}</p>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    {{ render(controller('App\\Controller\\NewsletterController::widget')) }}
+                </div>
+            </div>
         </footer>
     </body>
 </html>

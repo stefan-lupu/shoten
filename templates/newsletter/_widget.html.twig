@@ -1,0 +1,22 @@
+<div class="newsletter-widget">
+    <h2 class="h5">Abonează-te la noutățile {{ store.name }}</h2>
+
+    {{ form_start(form, { action: path('app_newsletter_subscribe'), attr: { class: 'row row-cols-lg-auto g-2 align-items-start' } }) }}
+        <div class="col-12">
+            {{ form_widget(form.email) }}
+            {{ form_errors(form.email) }}
+        </div>
+        <div class="col-12 form-check">
+            {{ form_widget(form.consentGiven) }}
+            {{ form_label(form.consentGiven) }}
+            {{ form_errors(form.consentGiven) }}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-sm">Abonează-te</button>
+        </div>
+    {{ form_end(form) }}
+
+    <p class="small text-body-secondary mt-2 mb-0">
+        Vezi <a href="{{ path('app_privacy_policy') }}">politica de confidențialitate</a>.
+    </p>
+</div>
