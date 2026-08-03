@@ -105,6 +105,21 @@ final class CartManager
         $this->entityManager->flush();
     }
 
+    /**
+     * Golește coșul (folosit după plasarea unei comenzi), fără să elimine
+     * coșul în sine — rămâne reutilizabil pentru comenzi viitoare.
+     */
+    public function clear(Cart $cart): void
+    {
+        foreach ($cart->getItems()->toArray() as $item) {
+            $cart->getItems()->removeElement($item);
+            $this->entityManager->remove($item);
+        }
+
+        $cart->touch();
+        $this->entityManager->flush();
+    }
+
     public function getTotal(Cart $cart): string
     {
         $total = '0.00';

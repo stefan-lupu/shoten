@@ -5,4 +5,5 @@
 {% block body %}
     <h1>Contul meu</h1>
     <p>Salut, {{ app.user.firstName }}!</p>
+    <p><a href="{{ path('app_order_index') }}">Comenzile mele</a></p>
 {% endblock %}

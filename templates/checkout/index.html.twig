@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finalizare comandă — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Finalizare comandă</h1>
+
+    <div class="checkout">
+        <div class="checkout__form">
+            {{ form_start(form) }}
+                <h2>Adresă de livrare</h2>
+                {{ form_row(form.fullName) }}
+                {{ form_row(form.phone) }}
+                {{ form_row(form.county) }}
+                {{ form_row(form.city) }}
+                {{ form_row(form.street) }}
+                {{ form_row(form.postalCode) }}
+
+                <h2>Metodă de plată</h2>
+                {{ form_row(form.paymentMethod) }}
+
+                <button type="submit" class="btn">Plasează comanda</button>
+            {{ form_end(form) }}
+        </div>
+
+        <div class="checkout__summary">
+            <h2>Sumar comandă</h2>
+            <ul>
+                {% for item in cart.items %}
+                    <li>{{ item.product.name }} × {{ item.quantity }} — {{ item.subtotal }} lei</li>
+                {% endfor %}
+            </ul>
+            <p class="checkout__total">Total: <strong>{{ total }} lei</strong></p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Comanda ta la <strong>{{ store.name }}</strong> a fost înregistrată cu succes.</p>
+
+        <table cellpadding="6" cellspacing="0" border="1">
+            <thead>
+                <tr>
+                    <th>Produs</th>
+                    <th>Cantitate</th>
+                    <th>Preț unitar</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.productName }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unitPrice }} lei</td>
+                        <td>{{ item.subtotal }} lei</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p><strong>Total: {{ order.total }} lei</strong></p>
+
+        <p>
+            Metodă de plată:
+            {% if order.paymentMethod.value == 'card' %}Card online
+            {% elseif order.paymentMethod.value == 'cod' %}Ramburs la livrare
+            {% else %}Transfer bancar
+            {% endif %}
+        </p>
+
+        <p>Livrare la: {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}</p>
+
+        <p>Îți mulțumim că ai ales {{ store.name }}!</p>
+    </body>
+</html>

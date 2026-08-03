@@ -36,6 +36,7 @@ Nu sări peste un task doar pentru că pare mic; ordinea contează pentru migră
   să rămână curat și ușor de urmărit pe cele 3 magazine.
 - Comenzi Symfony folosite frecvent: `php bin/console make:entity`,
   `make:migration`, `doctrine:migrations:migrate`, `make:controller`.
+- Foloseste bootstrap pentru frontend
 
 ## Context de business (pentru referință rapidă)
 

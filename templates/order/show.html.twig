@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Comanda #{{ order.id }} — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Comanda #{{ order.id }}</h1>
+    <p>Status: {{ order.status.value }}</p>
+    <p>Plată: {{ order.paymentMethod.value }} ({{ order.paymentStatus.value }})</p>
+    <p>Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
+
+    <table class="order-items-table">
+        <thead>
+            <tr>
+                <th>Produs</th>
+                <th>Cantitate</th>
+                <th>Preț unitar</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items %}
+                <tr>
+                    <td>{{ item.productName }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unitPrice }} lei</td>
+                    <td>{{ item.subtotal }} lei</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="order-total">Total: <strong>{{ order.total }} lei</strong></p>
+{% endblock %}
