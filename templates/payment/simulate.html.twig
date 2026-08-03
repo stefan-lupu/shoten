@@ -3,21 +3,23 @@
 {% block title %}Plată card (simulare) — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Plată cu cardul</h1>
+    <div class="mx-auto" style="max-width: 28rem">
+        <h1 class="mb-3">Plată cu cardul</h1>
 
-    <p class="payment-simulator-notice">
-        Mod simulat — nu există încă un cont real Netopia/Stripe conectat.
-        Această pagină stă în locul paginii găzduite de provider.
-    </p>
+        <div class="alert alert-warning">
+            Mod simulat — nu există încă un cont real Netopia/Stripe conectat.
+            Această pagină stă în locul paginii găzduite de provider.
+        </div>
 
-    <p>Comandă #{{ order.id }} — total <strong>{{ order.total }} lei</strong></p>
+        <p>Comandă #{{ order.id }} — total <strong>{{ order.total }} lei</strong></p>
 
-    <div class="payment-simulator-actions">
-        <button type="button" id="pay-success" class="btn">Simulează plată reușită</button>
-        <button type="button" id="pay-fail" class="btn btn--danger">Simulează plată eșuată</button>
+        <div class="d-flex gap-2">
+            <button type="button" id="pay-success" class="btn btn-success">Simulează plată reușită</button>
+            <button type="button" id="pay-fail" class="btn btn-danger">Simulează plată eșuată</button>
+        </div>
+
+        <p id="payment-simulator-status" class="mt-3"></p>
     </div>
-
-    <p id="payment-simulator-status"></p>
 
     <script>
         async function sendWebhook(payload, signature) {

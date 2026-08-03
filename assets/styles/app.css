@@ -1,3 +1,104 @@
+/*
+ * Leagă variabilele de temă ale magazinului (definite inline în
+ * base.html.twig, din StoreConfig) de Bootstrap. Nicio culoare nu e
+ * hardcodată aici — totul vine din --color-*.
+ *
+ * Bootstrap-ul precompilat (fără build Sass) NU leagă fiecare componentă
+ * de --bs-primary la runtime — multe (butoane, paginare, focus ring)
+ * au valorile "arse" în CSS la compilare. De-aia suprascriem explicit
+ * fiecare componentă folosită în proiect, nu doar variabilele de la :root.
+ */
+:root {
+    --bs-body-bg: var(--color-bg);
+    --bs-body-bg-rgb: var(--color-bg-rgb);
+    --bs-body-color: var(--color-text);
+    --bs-secondary-color: var(--color-text-muted);
+    --bs-tertiary-bg: var(--color-surface);
+    --bs-border-color: var(--color-surface);
+    --bs-border-color-translucent: var(--color-surface);
+
+    --bs-primary: var(--color-accent);
+    --bs-primary-rgb: var(--color-accent-rgb);
+    --bs-primary-text-emphasis: var(--color-accent-strong);
+    --bs-link-color: var(--color-accent);
+    --bs-link-color-rgb: var(--color-accent-rgb);
+    --bs-link-hover-color: var(--color-accent-strong);
+    --bs-link-hover-color-rgb: var(--color-accent-strong-rgb);
+}
+
 body {
-    background-color: skyblue;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+.navbar,
+.card {
+    background-color: var(--color-surface);
+}
+
+.btn-primary {
+    --bs-btn-color: var(--color-bg);
+    --bs-btn-bg: var(--color-accent);
+    --bs-btn-border-color: var(--color-accent);
+    --bs-btn-hover-color: var(--color-bg);
+    --bs-btn-hover-bg: var(--color-accent-strong);
+    --bs-btn-hover-border-color: var(--color-accent-strong);
+    --bs-btn-active-color: var(--color-bg);
+    --bs-btn-active-bg: var(--color-accent-strong);
+    --bs-btn-active-border-color: var(--color-accent-strong);
+    --bs-btn-disabled-bg: var(--color-accent);
+    --bs-btn-disabled-border-color: var(--color-accent);
+    --bs-btn-focus-shadow-rgb: var(--color-accent-rgb);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--color-accent);
+    --bs-btn-border-color: var(--color-accent);
+    --bs-btn-hover-color: var(--color-bg);
+    --bs-btn-hover-bg: var(--color-accent);
+    --bs-btn-hover-border-color: var(--color-accent);
+    --bs-btn-active-color: var(--color-bg);
+    --bs-btn-active-bg: var(--color-accent);
+    --bs-btn-active-border-color: var(--color-accent);
+    --bs-btn-disabled-color: var(--color-accent);
+    --bs-btn-disabled-border-color: var(--color-accent);
+    --bs-btn-focus-shadow-rgb: var(--color-accent-rgb);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 .25rem rgba(var(--color-accent-rgb), .25);
+}
+
+.form-check-input:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.form-check-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 .25rem rgba(var(--color-accent-rgb), .25);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--color-accent);
+    --bs-pagination-active-border-color: var(--color-accent);
+    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(var(--color-accent-rgb), .25);
+}
+
+.stock-badge--in-stock {
+    --bs-badge-color: #fff;
+    background-color: #198754;
+}
+
+.stock-badge--on-order {
+    --bs-badge-color: var(--color-bg);
+    background-color: var(--color-accent);
+}
+
+.logo-text {
+    color: var(--color-accent);
+    font-weight: 700;
+    text-decoration: none;
 }

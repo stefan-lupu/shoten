@@ -3,20 +3,22 @@
 {% block title %}Cont nou — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Cont nou</h1>
+    <div class="mx-auto" style="max-width: 28rem">
+        <h1 class="mb-3">Cont nou</h1>
 
-    {{ form_errors(registrationForm) }}
+        {{ form_errors(registrationForm) }}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email, { label: 'Email' }) }}
-        {{ form_row(registrationForm.firstName, { label: 'Prenume' }) }}
-        {{ form_row(registrationForm.lastName, { label: 'Nume' }) }}
-        {{ form_row(registrationForm.phone, { label: 'Telefon (opțional)' }) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Parolă'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms, { label: 'Sunt de acord cu termenii și condițiile' }) }}
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.email, { label: 'Email' }) }}
+            {{ form_row(registrationForm.firstName, { label: 'Prenume' }) }}
+            {{ form_row(registrationForm.lastName, { label: 'Nume' }) }}
+            {{ form_row(registrationForm.phone, { label: 'Telefon (opțional)' }) }}
+            {{ form_row(registrationForm.plainPassword, {
+                label: 'Parolă'
+            }) }}
+            {{ form_row(registrationForm.agreeTerms, { label: 'Sunt de acord cu termenii și condițiile' }) }}
 
-        <button type="submit" class="btn">Creează cont</button>
-    {{ form_end(registrationForm) }}
+            <button type="submit" class="btn btn-primary w-100">Creează cont</button>
+        {{ form_end(registrationForm) }}
+    </div>
 {% endblock %}

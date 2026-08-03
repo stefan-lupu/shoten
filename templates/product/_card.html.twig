@@ -1,8 +1,10 @@
-<article class="product-card">
-    <a href="{{ path('app_product_show', { slug: product.slug }) }}">
-        <h3>{{ product.name }}</h3>
-        <p class="product-card__price">{{ product.price }} lei</p>
-        <p class="product-card__origin">Origine: {{ product.origin }}</p>
-        {% include 'product/_stock_badge.html.twig' %}
+<div class="col">
+    <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="card h-100 text-decoration-none text-body">
+        <div class="card-body">
+            <h3 class="card-title h5">{{ product.name }}</h3>
+            <p class="card-text fw-bold">{{ product.price }} lei</p>
+            <p class="card-text text-body-secondary">Origine: {{ product.origin }}</p>
+            {% include 'product/_stock_badge.html.twig' %}
+        </div>
     </a>
-</article>
+</div>

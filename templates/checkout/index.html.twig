@@ -3,12 +3,12 @@
 {% block title %}Finalizare comandă — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Finalizare comandă</h1>
+    <h1 class="mb-4">Finalizare comandă</h1>
 
-    <div class="checkout">
-        <div class="checkout__form">
+    <div class="row g-4">
+        <div class="col-md-7">
             {{ form_start(form) }}
-                <h2>Adresă de livrare</h2>
+                <h2 class="h4">Adresă de livrare</h2>
                 {{ form_row(form.fullName) }}
                 {{ form_row(form.phone) }}
                 {{ form_row(form.county) }}
@@ -16,21 +16,28 @@
                 {{ form_row(form.street) }}
                 {{ form_row(form.postalCode) }}
 
-                <h2>Metodă de plată</h2>
+                <h2 class="h4 mt-4">Metodă de plată</h2>
                 {{ form_row(form.paymentMethod) }}
 
-                <button type="submit" class="btn">Plasează comanda</button>
+                <button type="submit" class="btn btn-primary mt-3">Plasează comanda</button>
             {{ form_end(form) }}
         </div>
 
-        <div class="checkout__summary">
-            <h2>Sumar comandă</h2>
-            <ul>
-                {% for item in cart.items %}
-                    <li>{{ item.product.name }} × {{ item.quantity }} — {{ item.subtotal }} lei</li>
-                {% endfor %}
-            </ul>
-            <p class="checkout__total">Total: <strong>{{ total }} lei</strong></p>
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h4 card-title">Sumar comandă</h2>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in cart.items %}
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                                <span>{{ item.subtotal }} lei</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p class="fs-5 mb-0">Total: <strong>{{ total }} lei</strong></p>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

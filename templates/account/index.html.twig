@@ -3,7 +3,7 @@
 {% block title %}Contul meu — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Contul meu</h1>
+    <h1 class="mb-3">Contul meu</h1>
     <p>Salut, {{ app.user.firstName }}!</p>
-    <p><a href="{{ path('app_order_index') }}">Comenzile mele</a></p>
+    <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
 {% endblock %}

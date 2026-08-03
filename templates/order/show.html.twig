@@ -3,48 +3,52 @@
 {% block title %}Comanda #{{ order.id }} — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Comanda #{{ order.id }}</h1>
-    <p>Status: {{ order.status.value }}</p>
+    <h1 class="mb-3">Comanda #{{ order.id }}</h1>
+    <p>Status: {% include 'order/_status_badge.html.twig' with { status: order.status } %}</p>
     <p>Plată: {{ order.paymentMethod.value }} ({{ order.paymentStatus.value }})</p>
     <p>Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
 
-    <table class="order-items-table">
-        <thead>
-            <tr>
-                <th>Produs</th>
-                <th>Cantitate</th>
-                <th>Preț unitar</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in order.items %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
                 <tr>
-                    <td>{{ item.productName }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.unitPrice }} lei</td>
-                    <td>{{ item.subtotal }} lei</td>
+                    <th>Produs</th>
+                    <th>Cantitate</th>
+                    <th>Preț unitar</th>
+                    <th>Subtotal</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.productName }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unitPrice }} lei</td>
+                        <td>{{ item.subtotal }} lei</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <p class="order-total">Total: <strong>{{ order.total }} lei</strong></p>
+    <p class="fs-5">Total: <strong>{{ order.total }} lei</strong></p>
 
     {% if order.paymentMethod.value == 'bank_transfer' and order.paymentStatus.value != 'paid' %}
-        <div class="bank-transfer-details">
-            <h2>Detalii transfer bancar</h2>
-            <p>Titular: {{ store.name }}</p>
-            <p>Bancă: {{ store.bankName }}</p>
-            <p>IBAN: {{ store.bankAccount }}</p>
-            <p>Menționează în detaliile transferului numărul comenzii: <strong>#{{ order.id }}</strong></p>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5 card-title">Detalii transfer bancar</h2>
+                <p class="mb-1">Titular: {{ store.name }}</p>
+                <p class="mb-1">Bancă: {{ store.bankName }}</p>
+                <p class="mb-1">IBAN: {{ store.bankAccount }}</p>
+                <p class="mb-0">Menționează în detaliile transferului numărul comenzii: <strong>#{{ order.id }}</strong></p>
+            </div>
         </div>
     {% endif %}
 
     {% if order.paymentMethod.value == 'card' and order.paymentStatus.value != 'paid' %}
         <form method="post" action="{{ path('app_order_retry_payment', { id: order.id }) }}">
             <input type="hidden" name="_token" value="{{ csrf_token('order_retry_payment_' ~ order.id) }}">
-            <button type="submit" class="btn">Reîncearcă plata</button>
+            <button type="submit" class="btn btn-primary">Reîncearcă plata</button>
         </form>
     {% endif %}
 {% endblock %}

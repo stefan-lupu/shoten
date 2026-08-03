@@ -26,6 +26,7 @@ final readonly class StoreConfig
         public string $googleAnalyticsId,
         public string $bankAccount,
         public string $bankName,
+        public string $themeMode,
     ) {
     }
 }

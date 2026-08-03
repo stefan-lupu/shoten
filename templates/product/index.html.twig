@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Produse recente</h1>
+    <h1 class="mb-4">Produse recente</h1>
 
-    <div class="product-grid">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for product in products %}
             {% include 'product/_card.html.twig' %}
         {% else %}

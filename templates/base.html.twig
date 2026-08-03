@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="ro" data-bs-theme="{{ store.themeMode }}">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,16 +12,14 @@
         <style>
             :root {
                 --color-bg: {{ store.themeColors.bg }};
+                --color-bg-rgb: {{ store.themeColors.bg|hex2rgb }};
                 --color-surface: {{ store.themeColors.surface }};
                 --color-text: {{ store.themeColors.text }};
                 --color-text-muted: {{ store.themeColors.textMuted }};
                 --color-accent: {{ store.themeColors.accent }};
+                --color-accent-rgb: {{ store.themeColors.accent|hex2rgb }};
                 --color-accent-strong: {{ store.themeColors.accentStrong }};
-            }
-
-            body {
-                background: var(--color-bg);
-                color: var(--color-text);
+                --color-accent-strong-rgb: {{ store.themeColors.accentStrong|hex2rgb }};
             }
         </style>
 
@@ -53,42 +51,44 @@
         {% endif %}
     </head>
     <body>
-        <header>
-            <a href="{{ path('app_home') }}" class="logo">
-                {% if store.logoPath %}
-                    <img src="{{ store.logoPath }}" alt="{{ store.name }}">
-                {% else %}
-                    <span class="logo-text">{{ store.name }}</span>
-                {% endif %}
-            </a>
-            {% if store.slogan %}
-                <p class="slogan">{{ store.slogan }}</p>
-            {% endif %}
-            <nav class="account-nav">
-                <a href="{{ path('app_cart') }}">Coș ({{ cart_manager.itemCount }})</a>
-                {% if is_granted('ROLE_USER') %}
-                    <a href="{{ path('app_account') }}">Cont</a>
-                    <a href="{{ path('app_logout') }}">Deconectare</a>
-                {% else %}
-                    <a href="{{ path('app_login') }}">Autentificare</a>
-                {% endif %}
-            </nav>
+        <header class="navbar navbar-expand-md">
+            <div class="container">
+                <a href="{{ path('app_home') }}" class="navbar-brand d-flex flex-column lh-1">
+                    {% if store.logoPath %}
+                        <img src="{{ store.logoPath }}" alt="{{ store.name }}" height="32">
+                    {% else %}
+                        <span class="logo-text fs-4">{{ store.name }}</span>
+                    {% endif %}
+                    {% if store.slogan %}
+                        <small class="text-body-secondary">{{ store.slogan }}</small>
+                    {% endif %}
+                </a>
+                <nav class="d-flex align-items-center gap-3 ms-auto">
+                    <a href="{{ path('app_cart') }}" class="btn btn-outline-primary btn-sm">Coș ({{ cart_manager.itemCount }})</a>
+                    {% if is_granted('ROLE_USER') %}
+                        <a href="{{ path('app_account') }}" class="nav-link d-inline">Cont</a>
+                        <a href="{{ path('app_logout') }}" class="nav-link d-inline">Deconectare</a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="nav-link d-inline">Autentificare</a>
+                    {% endif %}
+                </nav>
+            </div>
         </header>
 
-        <main>
+        <main class="container py-4">
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="flash flash--{{ label }}">{{ message }}</div>
+                    <span class="d-none" data-flash="{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</span>
                 {% endfor %}
             {% endfor %}
 
             {% block body %}{% endblock %}
         </main>
 
-        <footer>
-            <p>{{ store.name }}</p>
-            {% if store.email %}<p><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>{% endif %}
-            {% if store.phone %}<p>{{ store.phone }}</p>{% endif %}
+        <footer class="container py-4 mt-4 border-top text-body-secondary">
+            <p class="mb-1">{{ store.name }}</p>
+            {% if store.email %}<p class="mb-1"><a href="mailto:{{ store.email }}">{{ store.email }}</a></p>{% endif %}
+            {% if store.phone %}<p class="mb-0">{{ store.phone }}</p>{% endif %}
         </footer>
     </body>
 </html>

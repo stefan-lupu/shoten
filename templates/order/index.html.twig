@@ -3,32 +3,34 @@
 {% block title %}Comenzile mele — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1>Comenzile mele</h1>
+    <h1 class="mb-4">Comenzile mele</h1>
 
     {% if orders is empty %}
         <p>Nu ai plasat încă nicio comandă.</p>
     {% else %}
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Comandă</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
                     <tr>
-                        <td>#{{ order.id }}</td>
-                        <td>{{ order.createdAt|date('d.m.Y H:i') }}</td>
-                        <td>{{ order.status.value }}</td>
-                        <td>{{ order.total }} lei</td>
-                        <td><a href="{{ path('app_order_show', { id: order.id }) }}">Detalii</a></td>
+                        <th>Comandă</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th></th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.createdAt|date('d.m.Y H:i') }}</td>
+                            <td>{% include 'order/_status_badge.html.twig' with { status: order.status } %}</td>
+                            <td>{{ order.total }} lei</td>
+                            <td><a href="{{ path('app_order_show', { id: order.id }) }}" class="btn btn-sm btn-outline-secondary">Detalii</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 {% endblock %}

@@ -3,26 +3,33 @@
 {% block title %}Autentificare — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <form method="post">
-        {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-        {% endif %}
+    <div class="mx-auto" style="max-width: 24rem">
+        <form method="post">
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
 
-        {% if app.user %}
+            {% if app.user %}
+                <div class="alert alert-info">
+                    Ești autentificat ca {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Deconectare</a>
+                </div>
+            {% endif %}
+
+            <h1 class="h3 mb-3">Autentificare</h1>
+
             <div class="mb-3">
-                Ești autentificat ca {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Deconectare</a>
+                <label for="username" class="form-label">Email</label>
+                <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
             </div>
-        {% endif %}
+            <div class="mb-3">
+                <label for="password" class="form-label">Parolă</label>
+                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+            </div>
+            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-        <h1 class="h3 mb-3 font-weight-normal">Autentificare</h1>
-        <label for="username">Email</label>
-        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-        <label for="password">Parolă</label>
-        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-
-        <button class="btn btn-lg btn-primary" type="submit">
-            Autentificare
-        </button>
-    </form>
+            <button class="btn btn-primary w-100" type="submit">
+                Autentificare
+            </button>
+        </form>
+    </div>
 {% endblock %}

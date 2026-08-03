@@ -1,0 +1,15 @@
+{% set statusClasses = {
+    pending: 'text-bg-secondary',
+    confirmed: 'text-bg-primary',
+    shipped: 'text-bg-info',
+    delivered: 'text-bg-success',
+    cancelled: 'text-bg-danger',
+} %}
+{% set statusLabels = {
+    pending: 'În așteptare',
+    confirmed: 'Confirmată',
+    shipped: 'Expediată',
+    delivered: 'Livrată',
+    cancelled: 'Anulată',
+} %}
+<span class="badge {{ statusClasses[status.value] }}">{{ statusLabels[status.value] }}</span>
