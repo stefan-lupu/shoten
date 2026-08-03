@@ -1,0 +1,56 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Dashboard{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Comenzi (ultimele 7 zile)</h5>
+                    <p class="display-6 mb-0">{{ recentOrdersCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Recenzii în așteptare</h5>
+                    <p class="display-6 mb-0">{{ pendingReviewsCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Produse cu stoc redus</h5>
+                    <p class="display-6 mb-0">{{ lowStockProducts|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if lowStockProducts is not empty %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Produse cu stoc sub prag</h5>
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Produs</th>
+                            <th>Stoc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in lowStockProducts %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.stock }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

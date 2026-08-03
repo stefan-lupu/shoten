@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Enum\StockStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -81,5 +82,23 @@ class ProductRepository extends ServiceEntityRepository
         ;
 
         return new Paginator($qb);
+    }
+
+    /**
+     * Produse in_stock cu stoc sub pragul dat — pentru alerta din dashboard-ul admin.
+     *
+     * @return Product[]
+     */
+    public function findLowStock(int $threshold): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.stockStatus = :status')
+            ->andWhere('p.stock < :threshold')
+            ->setParameter('status', StockStatus::InStock)
+            ->setParameter('threshold', $threshold)
+            ->orderBy('p.stock', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }

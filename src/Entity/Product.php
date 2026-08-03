@@ -245,4 +245,9 @@ class Product
                 ->addViolation();
         }
     }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
 }

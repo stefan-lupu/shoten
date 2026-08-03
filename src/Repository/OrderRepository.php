@@ -35,4 +35,15 @@ class OrderRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function countSince(\DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->andWhere('o.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
+    }
 }

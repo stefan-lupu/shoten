@@ -205,4 +205,9 @@ class Campaign
     {
         return null === $this->maxUses || $this->usesCount < $this->maxUses;
     }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
 }
