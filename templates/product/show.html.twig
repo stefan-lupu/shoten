@@ -24,6 +24,13 @@
         <div class="col-md-6">
             <h1>{{ product.name }}</h1>
             {% include 'product/_stock_badge.html.twig' %}
+            <p class="mt-2 mb-0">
+                {% if averageRating %}
+                    ★ {{ averageRating|number_format(1) }} <span class="text-body-secondary">({{ reviews|length }} recenzi{{ reviews|length == 1 ? 'e' : 'i' }})</span>
+                {% else %}
+                    <span class="text-body-secondary">Fără recenzii încă</span>
+                {% endif %}
+            </p>
             <p class="fs-4 fw-bold mt-3">{{ product.price }} lei</p>
             <p class="text-body-secondary">Origine: {{ product.origin }}</p>
             <p>{{ product.description }}</p>
@@ -36,6 +43,39 @@
                 <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
                 <button type="submit" class="btn btn-primary">Adaugă în coș</button>
             </form>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <h2 class="h4">Recenzii</h2>
+
+            {% if reviews is empty %}
+                <p class="text-body-secondary">Nu există încă recenzii aprobate pentru acest produs.</p>
+            {% else %}
+                {% for review in reviews %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <p class="mb-1">
+                            {% for i in 1..review.rating %}★{% endfor %}{% if review.rating < 5 %}{% for i in 1..(5 - review.rating) %}☆{% endfor %}{% endif %}
+                            <strong>{{ review.user.firstName }}</strong>
+                        </p>
+                        <p class="mb-0">{{ review.comment }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <h3 class="h5 mt-4">Lasă o recenzie</h3>
+            {% if not is_granted('ROLE_USER') %}
+                <p><a href="{{ path('app_login') }}">Autentifică-te</a> pentru a lăsa o recenzie.</p>
+            {% elseif hasReviewed %}
+                <p class="text-body-secondary">Ai lăsat deja o recenzie pentru acest produs.</p>
+            {% else %}
+                {{ form_start(reviewForm, { action: path('app_review_create', { slug: product.slug }) }) }}
+                    {{ form_row(reviewForm.rating) }}
+                    {{ form_row(reviewForm.comment) }}
+                    <button type="submit" class="btn btn-primary">Trimite recenzia</button>
+                {{ form_end(reviewForm) }}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

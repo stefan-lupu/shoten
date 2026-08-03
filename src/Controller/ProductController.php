@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Review;
+use App\Form\ReviewType;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ReviewRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,15 +46,30 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/produs/{slug}', name: 'app_product_show')]
-    public function show(string $slug, ProductRepository $productRepository): Response
+    public function show(string $slug, ProductRepository $productRepository, ReviewRepository $reviewRepository): Response
     {
         $product = $productRepository->findOneBy(['slug' => $slug]);
         if (!$product) {
             throw new NotFoundHttpException('Produsul nu a fost găsit.');
         }
 
+        $user = $this->getUser();
+        $reviewForm = null;
+        $hasReviewed = false;
+
+        if ($user) {
+            $hasReviewed = null !== $reviewRepository->findOneByProductAndUser($product, $user);
+            if (!$hasReviewed) {
+                $reviewForm = $this->createForm(ReviewType::class, new Review());
+            }
+        }
+
         return $this->render('product/show.html.twig', [
             'product' => $product,
+            'reviews' => $reviewRepository->findApprovedByProduct($product),
+            'averageRating' => $reviewRepository->getAverageRating($product),
+            'reviewForm' => $reviewForm?->createView(),
+            'hasReviewed' => $hasReviewed,
         ]);
     }
 }
