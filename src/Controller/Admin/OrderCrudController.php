@@ -30,7 +30,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address as EmailAddress;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ORDERS_VIEWER')]
 class OrderCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -140,10 +140,15 @@ class OrderCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, $markShipped)
             ->add(Crud::PAGE_DETAIL, $markPaid)
             ->add(Crud::PAGE_DETAIL, $markShipped)
+            // Financiarul confirmă plata, Comenzi gestionează expedierea — fiecare
+            // vede/poate declanșa doar acțiunea din aria lui (ROLE_ADMIN le are pe amândouă).
+            ->setPermission('markPaid', 'ROLE_FINANCE_MANAGER')
+            ->setPermission('markShipped', 'ROLE_ORDERS_MANAGER')
         ;
     }
 
     #[AdminRoute(path: '/mark-paid', name: 'mark_paid')]
+    #[IsGranted('ROLE_FINANCE_MANAGER')]
     public function markPaid(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -173,6 +178,7 @@ class OrderCrudController extends AbstractCrudController
     }
 
     #[AdminRoute(path: '/mark-shipped', name: 'mark_shipped')]
+    #[IsGranted('ROLE_ORDERS_MANAGER')]
     public function markShipped(Request $request, EntityManagerInterface $entityManager, AdminUrlGenerator $adminUrlGenerator): RedirectResponse
     {
         $order = $entityManager->getRepository(Order::class)->find($request->query->get('entityId'));

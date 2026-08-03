@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_PANEL')]
 class DashboardController extends AbstractDashboardController
 {
     private const int LOW_STOCK_THRESHOLD = 10;
@@ -56,18 +56,21 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
 
-        yield MenuItem::section('Catalog');
-        yield MenuItem::linkTo(CategoryCrudController::class, 'Categorii', 'fa fa-sitemap');
-        yield MenuItem::linkTo(ProductCrudController::class, 'Produse', 'fa fa-box');
-        yield MenuItem::linkTo(ReviewCrudController::class, 'Recenzii', 'fa fa-star');
+        yield MenuItem::section('Catalog')->setPermission('ROLE_CATALOG_VIEWER');
+        yield MenuItem::linkTo(CategoryCrudController::class, 'Categorii', 'fa fa-sitemap')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkTo(ProductCrudController::class, 'Produse', 'fa fa-box')->setPermission('ROLE_STOCK_MANAGER');
+        yield MenuItem::linkTo(ReviewCrudController::class, 'Recenzii', 'fa fa-star')->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::section('Vânzări');
-        yield MenuItem::linkTo(OrderCrudController::class, 'Comenzi', 'fa fa-receipt');
-        yield MenuItem::linkTo(CampaignCrudController::class, 'Campanii', 'fa fa-tags');
-        yield MenuItem::linkTo(CampaignProductCrudController::class, 'Produse în campanii', 'fa fa-tag');
+        yield MenuItem::section('Vânzări')->setPermission('ROLE_ORDERS_VIEWER');
+        yield MenuItem::linkTo(OrderCrudController::class, 'Comenzi', 'fa fa-receipt')->setPermission('ROLE_ORDERS_VIEWER');
+        yield MenuItem::linkTo(CampaignCrudController::class, 'Campanii', 'fa fa-tags')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkTo(CampaignProductCrudController::class, 'Produse în campanii', 'fa fa-tag')->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::section('Marketing');
-        yield MenuItem::linkTo(NewsletterSubscriberCrudController::class, 'Abonați newsletter', 'fa fa-envelope');
+        yield MenuItem::section('Marketing')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkTo(NewsletterSubscriberCrudController::class, 'Abonați newsletter', 'fa fa-envelope')->setPermission('ROLE_ADMIN');
+
+        yield MenuItem::section('Utilizatori')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkTo(UserCrudController::class, 'Utilizatori', 'fa fa-users')->setPermission('ROLE_ADMIN');
 
         yield MenuItem::section();
         yield MenuItem::linkToUrl('Vezi magazinul', 'fa fa-external-link-alt', '/');

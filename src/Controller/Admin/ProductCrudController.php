@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Enum\StockStatus;
 use App\Form\ProductImageType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -16,7 +18,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_STOCK_MANAGER')]
 class ProductCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -33,27 +37,42 @@ class ProductCrudController extends AbstractCrudController
         ;
     }
 
+    public function configureActions(Actions $actions): Actions
+    {
+        // Gestionarul de stoc (ROLE_STOCK_MANAGER fără ROLE_ADMIN) poate
+        // ajusta stocul produselor existente, dar nu poate crea/șterge produse.
+        return $actions
+            ->setPermission(Action::NEW, 'ROLE_ADMIN')
+            ->setPermission(Action::DELETE, 'ROLE_ADMIN')
+        ;
+    }
+
     public function configureFields(string $pageName): iterable
     {
+        // Fără ROLE_ADMIN, doar câmpurile de stoc rămân editabile — restul
+        // sunt afișate needitabil (disabled), nu ascunse, ca gestionarul
+        // să vadă tot contextul produsului la ajustarea stocului.
+        $canEditAll = $this->isGranted('ROLE_ADMIN');
+
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('name', 'Nume');
+        yield TextField::new('name', 'Nume')->setFormTypeOption('disabled', !$canEditAll);
         yield TextField::new('slug')->hideOnForm();
-        yield AssociationField::new('category', 'Categorie');
+        yield AssociationField::new('category', 'Categorie')->setFormTypeOption('disabled', !$canEditAll);
         yield ChoiceField::new('stockStatus', 'Status stoc')
             ->setChoices(['În stoc' => StockStatus::InStock, 'La comandă' => StockStatus::OnOrder])
             ->renderAsBadges()
         ;
         yield IntegerField::new('stock', 'Stoc')->setHelp('Relevant doar pentru „În stoc”.');
         yield IntegerField::new('estimatedDays', 'Zile estimate')->setHelp('Relevant doar pentru „La comandă”.')->hideOnIndex();
-        yield NumberField::new('price', 'Preț (lei)')->setNumDecimals(2);
-        yield TextField::new('origin', 'Origine');
-        yield TextareaField::new('description', 'Descriere')->hideOnIndex();
-        yield TextField::new('metaTitle', 'Meta title (SEO)')->setRequired(false)->hideOnIndex();
-        yield TextareaField::new('metaDescription', 'Meta description (SEO)')->setRequired(false)->hideOnIndex();
+        yield NumberField::new('price', 'Preț (lei)')->setNumDecimals(2)->setFormTypeOption('disabled', !$canEditAll);
+        yield TextField::new('origin', 'Origine')->setFormTypeOption('disabled', !$canEditAll);
+        yield TextareaField::new('description', 'Descriere')->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);
+        yield TextField::new('metaTitle', 'Meta title (SEO)')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);
+        yield TextareaField::new('metaDescription', 'Meta description (SEO)')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);
         yield CollectionField::new('images', 'Imagini')
             ->setEntryType(ProductImageType::class)
-            ->allowAdd()
-            ->allowDelete()
+            ->allowAdd($canEditAll)
+            ->allowDelete($canEditAll)
             ->hideOnIndex()
         ;
         yield DateTimeField::new('createdAt')->hideOnForm();

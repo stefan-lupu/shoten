@@ -45,6 +45,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /**
+     * Nemapat în Doctrine — folosit doar ca punte între formularul din
+     * admin (EasyAdmin) și hash-uirea reală a parolei la salvare.
+     */
+    private ?string $plainPassword = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -176,5 +182,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString(): string
     {
         return $this->email ?? '';
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
     }
 }

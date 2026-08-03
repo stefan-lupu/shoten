@@ -36,11 +36,19 @@ security:
             # switch_user: true
 
     role_hierarchy:
-        ROLE_ADMIN: [ROLE_USER]
+        # ROLE_ADMIN_PANEL și ROLE_ORDERS_VIEWER sunt roluri "umbrelă", nu se
+        # atribuie direct unui utilizator — servesc doar ca poartă comună de
+        # acces (vezi access_control mai jos și #[IsGranted] din controllerele
+        # de admin), astfel încât un rol specializat (comenzi/financiar/
+        # gestionar) să nu aibă nevoie și de ROLE_ADMIN ca să intre în /admin.
+        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN_PANEL, ROLE_ORDERS_MANAGER, ROLE_FINANCE_MANAGER, ROLE_STOCK_MANAGER, ROLE_CATALOG_VIEWER]
+        ROLE_ORDERS_MANAGER: [ROLE_ADMIN_PANEL, ROLE_ORDERS_VIEWER]
+        ROLE_FINANCE_MANAGER: [ROLE_ADMIN_PANEL, ROLE_ORDERS_VIEWER]
+        ROLE_STOCK_MANAGER: [ROLE_ADMIN_PANEL, ROLE_CATALOG_VIEWER]
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN_PANEL }
         - { path: ^/cont, roles: ROLE_USER }
 
 when@test:
