@@ -3,6 +3,48 @@
 {% block title %}{{ product.metaTitle|default(product.name) }} — {{ store.name }}{% endblock %}
 {% block meta_description %}{{ product.metaDescription|default(store.defaultMetaDescription) }}{% endblock %}
 
+{% set productImageUrl = product.images is not empty ? absolute_url(asset('images/products/' ~ product.images.first.filename)) : (store.logoPath ? absolute_url(store.logoPath) : null) %}
+
+{% block open_graph %}
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="{{ store.name }}">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('meta_description') }}">
+    <meta property="og:url" content="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+    {% if productImageUrl %}
+        <meta property="og:image" content="{{ productImageUrl }}">
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": {{ product.name|json_encode|raw }},
+            "description": {{ (product.metaDescription|default(product.description))|json_encode|raw }},
+            "brand": {
+                "@type": "Brand",
+                "name": {{ store.name|json_encode|raw }}
+            }
+            {% if productImageUrl %},"image": {{ productImageUrl|json_encode|raw }}{% endif %},
+            "offers": {
+                "@type": "Offer",
+                "url": {{ (app.request.schemeAndHttpHost ~ app.request.pathInfo)|json_encode|raw }},
+                "priceCurrency": "RON",
+                "price": {{ product.price|json_encode|raw }},
+                "availability": "https://schema.org/{{ product.stockStatus.value == 'in_stock' ? 'InStock' : 'PreOrder' }}"
+            }
+            {% if averageRating %},"aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": {{ averageRating|json_encode|raw }},
+                "reviewCount": {{ reviews|length }}
+            }{% endif %}
+        }
+    </script>
+{% endblock %}
+
 {% block body %}
     <nav class="mb-3" aria-label="breadcrumb">
         <ol class="breadcrumb">

@@ -9,6 +9,21 @@
             <link rel="icon" href="{{ store.faviconPath }}">
         {% endif %}
 
+        {% block canonical %}
+            <link rel="canonical" href="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+        {% endblock %}
+
+        {% block open_graph %}
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="{{ store.name }}">
+            <meta property="og:title" content="{{ block('title') }}">
+            <meta property="og:description" content="{{ block('meta_description') }}">
+            <meta property="og:url" content="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+            {% if store.logoPath %}
+                <meta property="og:image" content="{{ absolute_url(store.logoPath) }}">
+            {% endif %}
+        {% endblock %}
+
         <style>
             :root {
                 --color-bg: {{ store.themeColors.bg }};
