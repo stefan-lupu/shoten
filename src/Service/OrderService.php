@@ -26,13 +26,14 @@ final class OrderService
         private readonly AddressRepository $addressRepository,
         private readonly MailerInterface $mailer,
         private readonly StoreConfig $store,
+        private readonly CampaignEngine $campaignEngine,
     ) {
     }
 
     /**
      * @throws InsufficientStockException
      */
-    public function placeOrder(User $user, Cart $cart, CheckoutData $data): Order
+    public function placeOrder(User $user, Cart $cart, CheckoutData $data, ?string $couponCode = null): Order
     {
         if ($cart->getItems()->isEmpty()) {
             throw new \DomainException('Coșul este gol.');
@@ -49,7 +50,9 @@ final class OrderService
             }
         }
 
-        return $this->entityManager->wrapInTransaction(function () use ($user, $cart, $data) {
+        return $this->entityManager->wrapInTransaction(function () use ($user, $cart, $data, $couponCode) {
+            $campaignResult = $this->campaignEngine->applyCampaigns($cart, $couponCode);
+
             $order = (new Order())
                 ->setUser($user)
                 ->setShippingFullName($data->fullName)
@@ -61,8 +64,13 @@ final class OrderService
                 ->setStatus(OrderStatus::Pending)
                 ->setPaymentMethod($data->paymentMethod)
                 ->setPaymentStatus(PaymentStatus::Pending)
-                ->setTotal($this->cartManager->getTotal($cart))
+                ->setTotal($campaignResult->total)
+                ->setCouponCode($couponCode ?: null)
             ;
+
+            foreach ($campaignResult->discounts as $discount) {
+                $discount->campaign->incrementUsesCount();
+            }
 
             foreach ($cart->getItems() as $cartItem) {
                 $product = $cartItem->getProduct();

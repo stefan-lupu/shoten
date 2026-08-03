@@ -8,6 +8,7 @@ use App\Enum\PaymentMethod;
 use App\Exception\InsufficientStockException;
 use App\Form\CheckoutType;
 use App\Repository\AddressRepository;
+use App\Service\CampaignEngine;
 use App\Service\CartManager;
 use App\Service\OrderService;
 use App\Service\Payment\CardPaymentService;
@@ -28,6 +29,7 @@ final class CheckoutController extends AbstractController
         OrderService $orderService,
         AddressRepository $addressRepository,
         CardPaymentService $cardPaymentService,
+        CampaignEngine $campaignEngine,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -39,6 +41,8 @@ final class CheckoutController extends AbstractController
             return $this->redirectToRoute('app_cart');
         }
 
+        $couponCode = $request->getSession()->get(CartController::COUPON_SESSION_KEY);
+
         $defaultAddress = $addressRepository->findOneBy(['user' => $user, 'isDefault' => true]);
         $data = CheckoutData::fromAddress($defaultAddress);
 
@@ -47,7 +51,8 @@ final class CheckoutController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $order = $orderService->placeOrder($user, $cart, $data);
+                $order = $orderService->placeOrder($user, $cart, $data, $couponCode);
+                $request->getSession()->remove(CartController::COUPON_SESSION_KEY);
 
                 if (PaymentMethod::Card === $order->getPaymentMethod()) {
                     return new RedirectResponse($cardPaymentService->createPaymentSession($order));
@@ -62,7 +67,7 @@ final class CheckoutController extends AbstractController
         return $this->render('checkout/index.html.twig', [
             'form' => $form,
             'cart' => $cart,
-            'total' => $cartManager->getTotal($cart),
+            'campaignResult' => $campaignEngine->applyCampaigns($cart, $couponCode),
         ]);
     }
 }

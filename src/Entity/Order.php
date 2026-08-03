@@ -62,6 +62,13 @@ class Order
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private ?string $total = null;
 
+    /**
+     * Codul de cupon folosit la plasarea comenzii, dacă a fost cazul —
+     * doar pentru trasabilitate/afișare, nu recalculează nimic.
+     */
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $couponCode = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -222,6 +229,18 @@ class Order
     public function setTotal(string $total): static
     {
         $this->total = $total;
+
+        return $this;
+    }
+
+    public function getCouponCode(): ?string
+    {
+        return $this->couponCode;
+    }
+
+    public function setCouponCode(?string $couponCode): static
+    {
+        $this->couponCode = $couponCode;
 
         return $this;
     }

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Exception\InsufficientStockException;
+use App\Service\CampaignEngine;
 use App\Service\CartManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -15,15 +16,44 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class CartController extends AbstractController
 {
+    public const string COUPON_SESSION_KEY = 'cart_coupon_code';
+
     #[Route('/cos', name: 'app_cart', methods: ['GET'])]
-    public function show(CartManager $cartManager): Response
+    public function show(Request $request, CartManager $cartManager, CampaignEngine $campaignEngine): Response
     {
         $cart = $cartManager->getCurrentCart();
+        $couponCode = $request->getSession()->get(self::COUPON_SESSION_KEY);
+        $campaignResult = $campaignEngine->applyCampaigns($cart, $couponCode);
 
         return $this->render('cart/index.html.twig', [
             'cart' => $cart,
-            'total' => $cartManager->getTotal($cart),
+            'campaignResult' => $campaignResult,
+            'appliedCouponCode' => $couponCode,
         ]);
+    }
+
+    #[Route('/cos/cupon', name: 'app_cart_apply_coupon', methods: ['POST'])]
+    public function applyCoupon(Request $request): RedirectResponse
+    {
+        $this->assertCsrfToken($request);
+        $code = trim((string) $request->request->get('coupon_code'));
+
+        if ('' === $code) {
+            $request->getSession()->remove(self::COUPON_SESSION_KEY);
+        } else {
+            $request->getSession()->set(self::COUPON_SESSION_KEY, $code);
+        }
+
+        return $this->redirectToRoute('app_cart');
+    }
+
+    #[Route('/cos/cupon/elimina', name: 'app_cart_remove_coupon', methods: ['POST'])]
+    public function removeCoupon(Request $request): RedirectResponse
+    {
+        $this->assertCsrfToken($request);
+        $request->getSession()->remove(self::COUPON_SESSION_KEY);
+
+        return $this->redirectToRoute('app_cart');
     }
 
     #[Route('/cos/adauga/{product}', name: 'app_cart_add', methods: ['POST'])]

@@ -46,7 +46,40 @@
             </table>
         </div>
 
-        <p class="fs-5">Total: <strong>{{ total }} lei</strong></p>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5 card-title">Cod promoțional</h2>
+                <form method="post" action="{{ path('app_cart_apply_coupon') }}" class="d-flex gap-2 mb-2">
+                    <input type="text" name="coupon_code" value="{{ appliedCouponCode }}" placeholder="Ex: PRIMAVARA20" class="form-control" style="max-width: 16rem">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
+                    <button type="submit" class="btn btn-outline-primary">Aplică</button>
+                    {% if appliedCouponCode %}
+                        <button type="submit" formaction="{{ path('app_cart_remove_coupon') }}" class="btn btn-outline-secondary">Elimină codul</button>
+                    {% endif %}
+                </form>
+
+                {% if campaignResult.couponError %}
+                    <div class="alert alert-danger mb-0">{{ campaignResult.couponError }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if campaignResult.discounts is not empty %}
+            <div class="alert alert-success">
+                <strong>Reduceri aplicate:</strong>
+                <ul class="mb-0">
+                    {% for discount in campaignResult.discounts %}
+                        <li>{{ discount.description }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <p class="mb-1">Subtotal: {{ campaignResult.subtotal }} lei</p>
+        {% if campaignResult.discounts is not empty %}
+            <p class="mb-1 text-success">Reducere totală: −{{ campaignResult.getTotalDiscount }} lei</p>
+        {% endif %}
+        <p class="fs-5">Total: <strong>{{ campaignResult.total }} lei</strong></p>
 
         {% if is_granted('ROLE_USER') %}
             <a href="{{ path('app_checkout') }}" class="btn btn-primary">Finalizează comanda</a>
