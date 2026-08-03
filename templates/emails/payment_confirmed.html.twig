@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Plata pentru comanda <strong>#{{ order.id }}</strong> la <strong>{{ store.name }}</strong> a fost confirmată.</p>
+
+        <p>Total plătit: <strong>{{ order.total }} lei</strong></p>
+
+        <p>Comanda este acum în procesare. Îți mulțumim că ai ales {{ store.name }}!</p>
+    </body>
+</html>

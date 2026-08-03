@@ -4,8 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Order;
 use App\Entity\User;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
 use App\Repository\OrderRepository;
+use App\Service\Payment\CardPaymentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -39,5 +44,26 @@ final class OrderController extends AbstractController
         return $this->render('order/show.html.twig', [
             'order' => $order,
         ]);
+    }
+
+    #[Route('/{id}/reincearca-plata', name: 'app_order_retry_payment', methods: ['POST'])]
+    public function retryPayment(Order $order, Request $request, CardPaymentService $cardPaymentService): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            throw new AccessDeniedHttpException('Această comandă nu îți aparține.');
+        }
+
+        if (!$this->isCsrfTokenValid('order_retry_payment_'.$order->getId(), $request->request->get('_token'))) {
+            throw new AccessDeniedHttpException('Token CSRF invalid.');
+        }
+
+        if (PaymentMethod::Card !== $order->getPaymentMethod() || PaymentStatus::Paid === $order->getPaymentStatus()) {
+            throw new AccessDeniedHttpException('Această comandă nu poate fi replătită.');
+        }
+
+        return new RedirectResponse($cardPaymentService->createPaymentSession($order));
     }
 }

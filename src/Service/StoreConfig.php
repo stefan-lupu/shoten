@@ -24,6 +24,8 @@ final readonly class StoreConfig
         public string $adsenseClientId,
         public string $googleAdsConversionId,
         public string $googleAnalyticsId,
+        public string $bankAccount,
+        public string $bankName,
     ) {
     }
 }

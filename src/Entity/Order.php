@@ -52,6 +52,13 @@ class Order
     #[ORM\Column(enumType: PaymentStatus::class)]
     private PaymentStatus $paymentStatus = PaymentStatus::Pending;
 
+    /**
+     * Referința sesiunii de plată la providerul de card (folosită pentru
+     * a lega webhook-ul de confirmare de comanda corectă).
+     */
+    #[ORM\Column(length: 64, nullable: true, unique: true)]
+    private ?string $paymentReference = null;
+
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private ?string $total = null;
 
@@ -191,6 +198,18 @@ class Order
     public function setPaymentStatus(PaymentStatus $paymentStatus): static
     {
         $this->paymentStatus = $paymentStatus;
+
+        return $this;
+    }
+
+    public function getPaymentReference(): ?string
+    {
+        return $this->paymentReference;
+    }
+
+    public function setPaymentReference(?string $paymentReference): static
+    {
+        $this->paymentReference = $paymentReference;
 
         return $this;
     }

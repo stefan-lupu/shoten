@@ -34,6 +34,8 @@ services:
             $adsenseClientId: '%env(GOOGLE_ADSENSE_CLIENT_ID)%'
             $googleAdsConversionId: '%env(GOOGLE_ADS_CONVERSION_ID)%'
             $googleAnalyticsId: '%env(GOOGLE_ANALYTICS_ID)%'
+            $bankAccount: '%env(STORE_BANK_ACCOUNT)%'
+            $bankName: '%env(STORE_BANK_NAME)%'
             $themeColors: !service
                 class: App\ValueObject\ThemeColors
                 arguments:
@@ -43,3 +45,8 @@ services:
                     $textMuted: '%env(THEME_COLOR_TEXT_MUTED)%'
                     $accent: '%env(THEME_COLOR_ACCENT)%'
                     $accentStrong: '%env(THEME_COLOR_ACCENT_STRONG)%'
+
+    App\Service\Payment\CardPaymentService:
+        arguments:
+            $apiKey: '%env(NETOPIA_API_KEY)%'
+            $webhookSecret: '%env(NETOPIA_SIGNATURE)%'

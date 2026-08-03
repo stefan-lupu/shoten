@@ -38,6 +38,13 @@
 
         <p>Livrare la: {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}</p>
 
+        {% if order.paymentMethod.value == 'bank_transfer' %}
+            <p>
+                Detalii transfer bancar — titular: {{ store.name }}, bancă: {{ store.bankName }},
+                IBAN: {{ store.bankAccount }}. Menționează numărul comenzii (#{{ order.id }}) la transfer.
+            </p>
+        {% endif %}
+
         <p>Îți mulțumim că ai ales {{ store.name }}!</p>
     </body>
 </html>

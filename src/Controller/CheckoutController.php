@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Dto\CheckoutData;
 use App\Entity\User;
+use App\Enum\PaymentMethod;
 use App\Exception\InsufficientStockException;
 use App\Form\CheckoutType;
 use App\Repository\AddressRepository;
 use App\Service\CartManager;
 use App\Service\OrderService;
+use App\Service\Payment\CardPaymentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,6 +27,7 @@ final class CheckoutController extends AbstractController
         CartManager $cartManager,
         OrderService $orderService,
         AddressRepository $addressRepository,
+        CardPaymentService $cardPaymentService,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -44,6 +48,10 @@ final class CheckoutController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $order = $orderService->placeOrder($user, $cart, $data);
+
+                if (PaymentMethod::Card === $order->getPaymentMethod()) {
+                    return new RedirectResponse($cardPaymentService->createPaymentSession($order));
+                }
 
                 return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
             } catch (InsufficientStockException $e) {

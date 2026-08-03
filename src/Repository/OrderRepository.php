@@ -17,6 +17,11 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
+    public function findOneByPaymentReference(string $reference): ?Order
+    {
+        return $this->findOneBy(['paymentReference' => $reference]);
+    }
+
     /**
      * @return Order[]
      */

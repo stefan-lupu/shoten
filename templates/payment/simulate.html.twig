@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Plată card (simulare) — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Plată cu cardul</h1>
+
+    <p class="payment-simulator-notice">
+        Mod simulat — nu există încă un cont real Netopia/Stripe conectat.
+        Această pagină stă în locul paginii găzduite de provider.
+    </p>
+
+    <p>Comandă #{{ order.id }} — total <strong>{{ order.total }} lei</strong></p>
+
+    <div class="payment-simulator-actions">
+        <button type="button" id="pay-success" class="btn">Simulează plată reușită</button>
+        <button type="button" id="pay-fail" class="btn btn--danger">Simulează plată eșuată</button>
+    </div>
+
+    <p id="payment-simulator-status"></p>
+
+    <script>
+        async function sendWebhook(payload, signature) {
+            const status = document.getElementById('payment-simulator-status');
+            status.textContent = 'Se procesează...';
+
+            const body = new URLSearchParams(payload);
+            const response = await fetch({{ webhookUrl|json_encode|raw }}, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Payment-Signature': signature,
+                },
+                body: body.toString(),
+            });
+
+            if (response.ok) {
+                window.location.href = {{ path('app_order_show', { id: order.id })|json_encode|raw }};
+            } else {
+                status.textContent = 'Webhook respins (' + response.status + ').';
+            }
+        }
+
+        document.getElementById('pay-success').addEventListener('click', () => {
+            sendWebhook({{ successPayload|json_encode|raw }}, {{ successSignature|json_encode|raw }});
+        });
+        document.getElementById('pay-fail').addEventListener('click', () => {
+            sendWebhook({{ failPayload|json_encode|raw }}, {{ failSignature|json_encode|raw }});
+        });
+    </script>
+{% endblock %}
