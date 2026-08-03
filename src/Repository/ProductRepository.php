@@ -47,12 +47,19 @@ class ProductRepository extends ServiceEntityRepository
         ;
     }
 
-    public function paginateByCategorySlug(string $slug, int $page, int $perPage = 12): Paginator
+    /**
+     * Paginează produsele dintr-una sau mai multe categorii deodată —
+     * pentru o categorie-părinte, se dă id-ul ei plus id-urile
+     * subcategoriilor (App\Repository\CategoryRepository::getSelfAndDescendantIds),
+     * ca produsele din subcategorii să apară și pe pagina părintelui.
+     *
+     * @param int[] $categoryIds
+     */
+    public function paginateByCategoryIds(array $categoryIds, int $page, int $perPage = 12): Paginator
     {
         $query = $this->createQueryBuilder('p')
-            ->join('p.category', 'c')
-            ->andWhere('c.slug = :slug')
-            ->setParameter('slug', $slug)
+            ->andWhere('p.category IN (:categoryIds)')
+            ->setParameter('categoryIds', $categoryIds)
             ->orderBy('p.name', 'ASC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
@@ -60,5 +67,19 @@ class ProductRepository extends ServiceEntityRepository
         ;
 
         return new Paginator($query);
+    }
+
+    public function paginateSearch(string $query, int $page, int $perPage = 12): Paginator
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.name LIKE :query OR p.description LIKE :query')
+            ->setParameter('query', '%'.$query.'%')
+            ->orderBy('p.name', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+        ;
+
+        return new Paginator($qb);
     }
 }

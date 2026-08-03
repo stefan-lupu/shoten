@@ -28,14 +28,34 @@ class Category
     private ?string $description = null;
 
     /**
+     * Ordinea de afișare (ASC) printre categoriile de pe același nivel —
+     * atât rădăcinile, cât și subcategoriile unui părinte se ordonează
+     * după acest câmp, nu alfabetic.
+     */
+    #[ORM\Column(name: 'order_no')]
+    private int $orderNo = 0;
+
+    /**
      * @var Collection<int, Product>
      */
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'category')]
     private Collection $products;
 
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'children')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?Category $parent = null;
+
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\OneToMany(targetEntity: Category::class, mappedBy: 'parent')]
+    #[ORM\OrderBy(['orderNo' => 'ASC'])]
+    private Collection $children;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->children = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -67,11 +87,63 @@ class Category
         return $this;
     }
 
+    public function getOrderNo(): int
+    {
+        return $this->orderNo;
+    }
+
+    public function setOrderNo(int $orderNo): static
+    {
+        $this->orderNo = $orderNo;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Product>
      */
     public function getProducts(): Collection
     {
         return $this->products;
+    }
+
+    public function getParent(): ?self
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?self $parent): static
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getChildren(): Collection
+    {
+        return $this->children;
+    }
+
+    public function isRoot(): bool
+    {
+        return null === $this->parent;
+    }
+
+    /**
+     * @return Category[] Lanțul de la categoria rădăcină până la aceasta (inclusiv), pentru breadcrumb.
+     */
+    public function getAncestryChain(): array
+    {
+        $chain = [$this];
+        $current = $this;
+        while ($current->getParent()) {
+            $current = $current->getParent();
+            array_unshift($chain, $current);
+        }
+
+        return $chain;
     }
 }

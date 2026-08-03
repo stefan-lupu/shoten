@@ -4,6 +4,7 @@ twig:
     globals:
         store: '@App\Service\StoreConfig'
         cart_manager: '@App\Service\CartManager'
+        category_repository: '@App\Repository\CategoryRepository'
 
 when@test:
     twig:

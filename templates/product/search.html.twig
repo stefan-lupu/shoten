@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% if query %}Rezultate pentru „{{ query }}”{% else %}Căutare{% endif %} — {{ store.name }}
+{% endblock %}
+
+{% block body %}
+    {% if query %}
+        <h1>Rezultate pentru „{{ query }}”</h1>
+    {% else %}
+        <h1>Căutare produse</h1>
+        <p class="text-body-secondary">Introdu un termen de căutare mai sus.</p>
+    {% endif %}
+
+    {% if query %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
+            {% for product in products %}
+                {% include 'product/_card.html.twig' %}
+            {% else %}
+                <p>Niciun produs găsit pentru „{{ query }}”.</p>
+            {% endfor %}
+        </div>
+
+        {% if totalPages > 1 %}
+            <nav aria-label="Paginare">
+                <ul class="pagination">
+                    {% for p in 1..totalPages %}
+                        <li class="page-item {{ p == page ? 'active' }}">
+                            <a class="page-link" href="{{ path('app_product_search', { q: query, page: p }) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% endif %}
+{% endblock %}

@@ -7,13 +7,27 @@
     <nav class="mb-3" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Acasă</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+            {% for ancestor in category.ancestryChain %}
+                {% if loop.last %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ ancestor.name }}</li>
+                {% else %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_category_show', { slug: ancestor.slug }) }}">{{ ancestor.name }}</a></li>
+                {% endif %}
+            {% endfor %}
         </ol>
     </nav>
 
     <h1>{{ category.name }}</h1>
     {% if category.description %}
         <p>{{ category.description }}</p>
+    {% endif %}
+
+    {% if category.children is not empty %}
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            {% for child in category.children %}
+                <a href="{{ path('app_category_show', { slug: child.slug }) }}" class="btn btn-outline-secondary btn-sm">{{ child.name }}</a>
+            {% endfor %}
+        </div>
     {% endif %}
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">

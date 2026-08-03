@@ -34,11 +34,33 @@ final class ProductController extends AbstractController
         }
 
         $page = max(1, $request->query->getInt('page', 1));
-        $products = $productRepository->paginateByCategorySlug($slug, $page, self::PER_PAGE);
+        $categoryIds = $categoryRepository->getSelfAndDescendantIds($category);
+        $products = $productRepository->paginateByCategoryIds($categoryIds, $page, self::PER_PAGE);
         $totalPages = (int) ceil(count($products) / self::PER_PAGE);
 
         return $this->render('product/category.html.twig', [
             'category' => $category,
+            'products' => $products,
+            'page' => $page,
+            'totalPages' => $totalPages,
+        ]);
+    }
+
+    #[Route('/cautare', name: 'app_product_search')]
+    public function search(Request $request, ProductRepository $productRepository): Response
+    {
+        $query = trim((string) $request->query->get('q', ''));
+        $page = max(1, $request->query->getInt('page', 1));
+
+        $products = [];
+        $totalPages = 0;
+        if ('' !== $query) {
+            $products = $productRepository->paginateSearch($query, $page, self::PER_PAGE);
+            $totalPages = (int) ceil(count($products) / self::PER_PAGE);
+        }
+
+        return $this->render('product/search.html.twig', [
+            'query' => $query,
             'products' => $products,
             'page' => $page,
             'totalPages' => $totalPages,

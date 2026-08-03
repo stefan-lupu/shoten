@@ -52,7 +52,7 @@
     </head>
     <body>
         <header class="navbar navbar-expand-md">
-            <div class="container">
+            <div class="container flex-wrap">
                 <a href="{{ path('app_home') }}" class="navbar-brand d-flex flex-column lh-1">
                     {% if store.logoPath %}
                         <img src="{{ store.logoPath }}" alt="{{ store.name }}" height="32">
@@ -63,15 +63,44 @@
                         <small class="text-body-secondary">{{ store.slogan }}</small>
                     {% endif %}
                 </a>
-                <nav class="d-flex align-items-center gap-3 ms-auto">
-                    <a href="{{ path('app_cart') }}" class="btn btn-outline-primary btn-sm">Coș ({{ cart_manager.itemCount }})</a>
-                    {% if is_granted('ROLE_USER') %}
-                        <a href="{{ path('app_account') }}" class="nav-link d-inline">Cont</a>
-                        <a href="{{ path('app_logout') }}" class="nav-link d-inline">Deconectare</a>
-                    {% else %}
-                        <a href="{{ path('app_login') }}" class="nav-link d-inline">Autentificare</a>
-                    {% endif %}
-                </nav>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Comută navigarea">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="main-nav">
+                    <ul class="navbar-nav me-auto">
+                        {% import 'product/_category_menu_items.html.twig' as categoryMenu %}
+                        {% for category in category_repository.findRootCategories %}
+                            {% if category.children is empty %}
+                                <li class="nav-item">
+                                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="nav-link">{{ category.name }}</a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item dropdown">
+                                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ category.name }}</a>
+                                    <ul class="dropdown-menu">
+                                        {{ categoryMenu.items(category.children, 0) }}
+                                    </ul>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+                    <form method="get" action="{{ path('app_product_search') }}" class="d-flex mx-md-3 my-2 my-md-0" role="search">
+                        <input type="search" name="q" value="{{ app.request.query.get('q') }}" class="form-control form-control-sm" placeholder="Caută produse..." aria-label="Caută produse">
+                    </form>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ path('app_cart') }}" class="btn btn-outline-primary btn-sm">Coș ({{ cart_manager.itemCount }})</a>
+                        {% if is_granted('ROLE_USER') %}
+                            <a href="{{ path('app_account') }}" class="nav-link d-inline">Cont</a>
+                            <a href="{{ path('app_logout') }}" class="nav-link d-inline">Deconectare</a>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="nav-link d-inline">Autentificare</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </header>
 
