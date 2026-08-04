@@ -88,8 +88,8 @@ body {
 }
 
 .stock-badge--in-stock {
-    --bs-badge-color: #fff;
-    background-color: #198754;
+    --bs-badge-color: var(--bs-white);
+    background-color: var(--bs-success);
 }
 
 .stock-badge--on-order {

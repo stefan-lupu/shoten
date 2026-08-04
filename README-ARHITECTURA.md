@@ -35,3 +35,28 @@ Copiază `.env.local.example` în `.env.local`, completează valorile — gata.
 Niciun fișier `.twig` sau `.php` nu trebuie atins. Testul rapid: schimbă o
 valoare (ex. `STORE_NAME` sau `THEME_COLOR_ACCENT`) și reîncarcă pagina —
 schimbarea trebuie să fie vizibilă imediat.
+
+## Checklist de clonare (magazin 2, 3, ...)
+
+- [ ] `git clone` din repo-ul „Rechizite Japan", schimbă `git remote`.
+- [ ] Copiază `.env.local.example` → `.env.local`, completează toate
+      valorile pentru noul brand (inclusiv `APP_SECRET` — generează unul nou,
+      nu-l copia din alt magazin).
+- [ ] Înlocuiește `assets/images/store/` cu logo/favicon noi.
+- [ ] Creează baza de date nouă, rulează `doctrine:migrations:migrate`.
+- [ ] Creează cont `ROLE_ADMIN` cu `app:create-admin` (sau din panoul
+      Utilizatori, odată ce există un prim admin).
+- [ ] Populează categorii/produse specifice noii game (`SeedCatalogCommand`
+      e idempotent, dar conține datele de exemplu „Rechizite Japan" —
+      adaptează-l sau populează manual din admin).
+- [ ] Configurează cheile API proprii (Netopia/plăți, Google Ads, AdSense,
+      Analytics) — niciodată reutilizate de la primul magazin.
+- [ ] Test complet de flux: navigare catalog → coș → checkout → comandă
+      → email confirmare, pe magazinul nou.
+- [ ] Verifică `/sitemap.xml` și `/robots.txt` reflectă domeniul corect.
+
+**Verificat** (2026-08-04, vezi `tasks/done/14-pregatire-clonare.md`):
+audit text/culori hardcodate — curat; test live de rebrand (nume, slogan,
+culori, domeniu în `robots.txt`) — reflectat instant fără atingerea
+codului; test bază de date nouă + migrări — pornește goală, zero date
+reziduale.
