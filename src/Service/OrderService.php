@@ -39,6 +39,11 @@ final class OrderService
             throw new \DomainException('Coșul este gol.');
         }
 
+        // Calculat o singură dată aici (nu recalculat în tranzacție), ca
+        // rezultatul (inclusiv cadourile BOGO auto-incluse) să fie identic
+        // cu ce a validat verificarea de stoc de mai jos.
+        $campaignResult = $this->campaignEngine->applyCampaigns($cart, $couponCode);
+
         foreach ($cart->getItems() as $item) {
             $product = $item->getProduct();
             if ($product->getStockStatus() === StockStatus::InStock && $item->getQuantity() > $product->getStock()) {
@@ -50,9 +55,22 @@ final class OrderService
             }
         }
 
-        return $this->entityManager->wrapInTransaction(function () use ($user, $cart, $data, $couponCode) {
-            $campaignResult = $this->campaignEngine->applyCampaigns($cart, $couponCode);
+        foreach ($campaignResult->discounts as $discount) {
+            $giftProduct = $discount->freeGiftProduct;
+            if ($giftProduct && $discount->freeGiftQuantity > 0
+                && $giftProduct->getStockStatus() === StockStatus::InStock
+                && $discount->freeGiftQuantity > $giftProduct->getStock()
+            ) {
+                throw new InsufficientStockException(sprintf(
+                    'Stoc insuficient pentru cadoul „%s” din campania „%s”. Disponibil: %d buc.',
+                    $giftProduct->getName(),
+                    $discount->campaign->getName(),
+                    $giftProduct->getStock(),
+                ));
+            }
+        }
 
+        return $this->entityManager->wrapInTransaction(function () use ($user, $cart, $data, $couponCode, $campaignResult) {
             $order = (new Order())
                 ->setUser($user)
                 ->setShippingFullName($data->fullName)
@@ -85,6 +103,25 @@ final class OrderService
 
                 if ($product->getStockStatus() === StockStatus::InStock) {
                     $product->setStock($product->getStock() - $cartItem->getQuantity());
+                }
+            }
+
+            foreach ($campaignResult->discounts as $discount) {
+                $giftProduct = $discount->freeGiftProduct;
+                if (!$giftProduct || $discount->freeGiftQuantity <= 0) {
+                    continue;
+                }
+
+                $giftOrderItem = (new OrderItem())
+                    ->setProduct($giftProduct)
+                    ->setProductName($giftProduct->getName().' (cadou)')
+                    ->setQuantity($discount->freeGiftQuantity)
+                    ->setUnitPrice('0.00')
+                ;
+                $order->addItem($giftOrderItem);
+
+                if ($giftProduct->getStockStatus() === StockStatus::InStock) {
+                    $giftProduct->setStock($giftProduct->getStock() - $discount->freeGiftQuantity);
                 }
             }
 

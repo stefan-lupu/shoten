@@ -8,6 +8,7 @@ use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
 use App\Service\StoreConfig;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -50,6 +51,13 @@ class DashboardController extends AbstractDashboardController
             ->setTitle($title)
             ->setFaviconPath($this->store->faviconPath ?: '/favicon.ico')
         ;
+    }
+
+    public function configureAssets(): Assets
+    {
+        // Necesar pentru câmpurile cu autocomplete (ex: produse din campanii) —
+        // vezi assets/admin.js pentru de ce nu refolosim entrypoint-ul „app”.
+        return Assets::new()->addAssetMapperEntry('admin');
     }
 
     public function configureMenuItems(): iterable

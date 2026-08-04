@@ -4,8 +4,8 @@ namespace App\Enum;
 
 enum CampaignType: string
 {
-    case PercentageDiscount = 'percentage_discount';
-    case FixedDiscount = 'fixed_discount';
+    /** Reducere pe produse țintă (sau tot coșul, dacă nu are ținte) — procent sau sumă fixă, vezi DiscountValueType. */
+    case Discount = 'discount';
     case Coupon = 'coupon';
     case Bogo = 'bogo';
     case GiftThreshold = 'gift_threshold';

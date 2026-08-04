@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\CampaignProductRole;
 use App\Enum\CampaignType;
+use App\Enum\DiscountValueType;
 use App\Repository\CampaignRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -37,6 +38,12 @@ class Campaign
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $discountValue = null;
+
+    /**
+     * Relevant doar pentru CampaignType::Discount — decide dacă discountValue e procent sau lei.
+     */
+    #[ORM\Column(enumType: DiscountValueType::class, nullable: true)]
+    private ?DiscountValueType $discountValueType = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $maxUses = null;
@@ -144,6 +151,18 @@ class Campaign
         return $this;
     }
 
+    public function getDiscountValueType(): ?DiscountValueType
+    {
+        return $this->discountValueType;
+    }
+
+    public function setDiscountValueType(?DiscountValueType $discountValueType): static
+    {
+        $this->discountValueType = $discountValueType;
+
+        return $this;
+    }
+
     public function getMaxUses(): ?int
     {
         return $this->maxUses;
@@ -172,6 +191,27 @@ class Campaign
     public function getCampaignProducts(): Collection
     {
         return $this->campaignProducts;
+    }
+
+    public function addCampaignProduct(CampaignProduct $campaignProduct): static
+    {
+        if (!$this->campaignProducts->contains($campaignProduct)) {
+            $this->campaignProducts->add($campaignProduct);
+            $campaignProduct->setCampaign($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampaignProduct(CampaignProduct $campaignProduct): static
+    {
+        if ($this->campaignProducts->removeElement($campaignProduct)) {
+            if ($campaignProduct->getCampaign() === $this) {
+                $campaignProduct->setCampaign(null);
+            }
+        }
+
+        return $this;
     }
 
     /**

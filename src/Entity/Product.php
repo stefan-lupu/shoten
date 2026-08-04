@@ -36,6 +36,18 @@ class Product
     #[ORM\Column(length: 100)]
     private ?string $origin = null;
 
+    /**
+     * Cod SKU intern, folosit doar în admin (gestiune stoc, căutare rapidă).
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $internalCode = null;
+
+    /**
+     * Cod de la furnizor/producător extern (ex: EAN, cod catalog furnizor).
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $externalCode = null;
+
     #[ORM\Column(enumType: StockStatus::class)]
     private ?StockStatus $stockStatus = null;
 
@@ -120,6 +132,30 @@ class Product
     public function setOrigin(string $origin): static
     {
         $this->origin = $origin;
+
+        return $this;
+    }
+
+    public function getInternalCode(): ?string
+    {
+        return $this->internalCode;
+    }
+
+    public function setInternalCode(?string $internalCode): static
+    {
+        $this->internalCode = $internalCode;
+
+        return $this;
+    }
+
+    public function getExternalCode(): ?string
+    {
+        return $this->externalCode;
+    }
+
+    public function setExternalCode(?string $externalCode): static
+    {
+        $this->externalCode = $externalCode;
 
         return $this;
     }

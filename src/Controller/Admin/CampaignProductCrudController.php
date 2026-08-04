@@ -30,13 +30,13 @@ class CampaignProductCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield AssociationField::new('campaign', 'Campanie');
-        yield AssociationField::new('product', 'Produs');
+        yield AssociationField::new('campaign', 'Campanie')->autocomplete();
+        yield AssociationField::new('product', 'Produs')->autocomplete();
         yield ChoiceField::new('role', 'Rol')
             ->setChoices([
                 'Țintă (produsul la care se aplică reducerea)' => CampaignProductRole::Target,
-                'Declanșator (BOGO)' => CampaignProductRole::Trigger,
-                'Cadou' => CampaignProductRole::Gift,
+                'Trebuie adăugat în coș (declanșează BOGO)' => CampaignProductRole::Trigger,
+                'Gratuit automat (cost 0, la finalizare comandă)' => CampaignProductRole::Gift,
                 'Parte din bundle' => CampaignProductRole::BundleItem,
             ])
             ->renderAsBadges()

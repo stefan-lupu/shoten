@@ -66,6 +66,8 @@ class ProductCrudController extends AbstractCrudController
         yield IntegerField::new('estimatedDays', 'Zile estimate')->setHelp('Relevant doar pentru „La comandă”.')->hideOnIndex();
         yield NumberField::new('price', 'Preț (lei)')->setNumDecimals(2)->setFormTypeOption('disabled', !$canEditAll);
         yield TextField::new('origin', 'Origine')->setFormTypeOption('disabled', !$canEditAll);
+        yield TextField::new('internalCode', 'Cod intern')->setRequired(false)->setFormTypeOption('disabled', !$canEditAll);
+        yield TextField::new('externalCode', 'Cod extern')->setRequired(false)->setFormTypeOption('disabled', !$canEditAll);
         yield TextareaField::new('description', 'Descriere')->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);
         yield TextField::new('metaTitle', 'Meta title (SEO)')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);
         yield TextareaField::new('metaDescription', 'Meta description (SEO)')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll);

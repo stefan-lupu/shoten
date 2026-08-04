@@ -7,6 +7,7 @@ use App\Entity\CampaignProduct;
 use App\Entity\Product;
 use App\Enum\CampaignProductRole;
 use App\Enum\CampaignType;
+use App\Enum\DiscountValueType;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -40,7 +41,8 @@ final class SeedCampaignsCommand extends Command
 
         $percentage = (new Campaign())
             ->setName('10% reducere la Pilot G2')
-            ->setType(CampaignType::PercentageDiscount)
+            ->setType(CampaignType::Discount)
+            ->setDiscountValueType(DiscountValueType::Percentage)
             ->setDiscountValue('10.00')
         ;
         $percentage->getCampaignProducts()->add(
@@ -49,7 +51,8 @@ final class SeedCampaignsCommand extends Command
 
         $fixed = (new Campaign())
             ->setName('15 lei reducere la orice comandă')
-            ->setType(CampaignType::FixedDiscount)
+            ->setType(CampaignType::Discount)
+            ->setDiscountValueType(DiscountValueType::Fixed)
             ->setDiscountValue('15.00')
         ;
 
@@ -98,7 +101,7 @@ final class SeedCampaignsCommand extends Command
         }
         $this->entityManager->flush();
 
-        $io->success('6 campanii de test create (percentage_discount, fixed_discount, coupon, bogo, gift_threshold, bundle).');
+        $io->success('6 campanii de test create (discount ×2, coupon, bogo, gift_threshold, bundle).');
 
         return Command::SUCCESS;
     }

@@ -65,4 +65,9 @@ class CampaignProduct
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return trim(($this->product?->getName() ?? 'Produs nesetat').' — '.($this->role?->value ?? ''), ' —');
+    }
 }

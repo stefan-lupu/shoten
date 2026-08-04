@@ -19,9 +19,9 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
  * depinde de ordinea în care campaniile au fost create.
  *
  * Ordinea de EVALUARE (relevantă doar pentru ordinea afișării, nu pentru
- * matematică, care e independentă): procentuale → fixe → BOGO → cadou la
+ * matematică, care e independentă): reduceri (procent/fix) → BOGO → cadou la
  * prag → bundle → cupon (cuponul e mereu ultimul, conform cerinței
- * „reduceri procentuale înainte de cupon fix").
+ * „reduceri înainte de cupon fix").
  *
  * Suma tuturor reducerilor e scăzută o singură dată din subtotal, iar
  * totalul final e limitat la minim 0.
@@ -29,8 +29,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 final class CampaignEngine
 {
     private const array AUTOMATIC_TYPE_ORDER = [
-        CampaignType::PercentageDiscount,
-        CampaignType::FixedDiscount,
+        CampaignType::Discount,
         CampaignType::Bogo,
         CampaignType::GiftThreshold,
         CampaignType::Bundle,

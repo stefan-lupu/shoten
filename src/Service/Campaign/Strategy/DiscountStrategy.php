@@ -5,27 +5,30 @@ namespace App\Service\Campaign\Strategy;
 use App\Dto\CampaignDiscount;
 use App\Entity\Campaign;
 use App\Entity\Cart;
+use App\Entity\Product;
 use App\Enum\CampaignProductRole;
 use App\Enum\CampaignType;
-use App\Entity\Product;
+use App\Enum\DiscountValueType;
 
 /**
- * Reducere procentuală — pe produse țintă (role=target) dacă sunt definite,
- * altfel pe tot coșul (reducere generală de site).
+ * Reducere (procent sau sumă fixă, vezi Campaign::$discountValueType) — pe
+ * produse țintă (role=target) dacă sunt definite, altfel pe tot coșul.
+ * Reducerea fixă nu poate depăși valoarea bazei pe care se aplică.
  */
-final class PercentageDiscountStrategy implements CampaignStrategyInterface
+final class DiscountStrategy implements CampaignStrategyInterface
 {
     use CartLookupTrait;
 
     public function supports(Campaign $campaign): bool
     {
-        return CampaignType::PercentageDiscount === $campaign->getType();
+        return CampaignType::Discount === $campaign->getType();
     }
 
     public function evaluate(Cart $cart, Campaign $campaign): ?CampaignDiscount
     {
-        $percent = $campaign->getDiscountValue();
-        if (null === $percent) {
+        $value = $campaign->getDiscountValue();
+        $valueType = $campaign->getDiscountValueType();
+        if (null === $value || null === $valueType) {
             return null;
         }
 
@@ -36,7 +39,14 @@ final class PercentageDiscountStrategy implements CampaignStrategyInterface
             return null;
         }
 
-        $amount = bcdiv(bcmul($base, $percent, 4), '100', 2);
+        if (DiscountValueType::Percentage === $valueType) {
+            $amount = bcdiv(bcmul($base, $value, 4), '100', 2);
+            $description = sprintf('%s: −%s%% (%s lei)', $campaign->getName(), rtrim(rtrim($value, '0'), '.'), $amount);
+        } else {
+            $amount = bccomp($value, $base, 2) > 0 ? $base : $value;
+            $description = sprintf('%s: −%s lei', $campaign->getName(), $amount);
+        }
+
         if (bccomp($amount, '0.00', 2) <= 0) {
             return null;
         }
@@ -44,7 +54,7 @@ final class PercentageDiscountStrategy implements CampaignStrategyInterface
         return new CampaignDiscount(
             campaign: $campaign,
             amount: $amount,
-            description: sprintf('%s: −%s%% (%s lei)', $campaign->getName(), rtrim(rtrim($percent, '0'), '.'), $amount),
+            description: $description,
         );
     }
 
