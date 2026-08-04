@@ -17,6 +17,9 @@
                 label: 'Parolă'
             }) }}
             {{ form_row(registrationForm.agreeTerms, { label: 'Sunt de acord cu termenii și condițiile' }) }}
+            <p class="small text-body-secondary mt-n2 mb-3">
+                Citește <a href="{{ path('app_terms') }}" target="_blank">termenii și condițiile</a>.
+            </p>
 
             <button type="submit" class="btn btn-primary w-100">Creează cont</button>
         {{ form_end(registrationForm) }}

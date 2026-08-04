@@ -136,13 +136,19 @@ class OrderCrudController extends AbstractCrudController
             ->linkToCrudAction('markShipped')
             ->displayIf(static fn (Order $order) => !\in_array($order->getStatus(), [OrderStatus::Shipped, OrderStatus::Delivered, OrderStatus::Cancelled], true))
         ;
+        $invoice = Action::new('invoice', 'Factură (PDF)', 'fa fa-file-pdf')
+            ->linkToRoute('app_order_invoice', static fn (Order $order) => ['id' => $order->getId()])
+            ->setHtmlAttributes(['target' => '_blank'])
+        ;
 
         return $actions
             ->disable(Action::NEW, Action::DELETE)
             ->add(Crud::PAGE_INDEX, $markPaid)
             ->add(Crud::PAGE_INDEX, $markShipped)
+            ->add(Crud::PAGE_INDEX, $invoice)
             ->add(Crud::PAGE_DETAIL, $markPaid)
             ->add(Crud::PAGE_DETAIL, $markShipped)
+            ->add(Crud::PAGE_DETAIL, $invoice)
             // Financiarul confirmă plata, Comenzi gestionează expedierea — fiecare
             // vede/poate declanșa doar acțiunea din aria lui (ROLE_ADMIN le are pe amândouă).
             ->setPermission('markPaid', 'ROLE_FINANCE_MANAGER')

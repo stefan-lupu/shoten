@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #222; }
+        h1 { font-size: 20px; margin-bottom: 4px; }
+        .muted { color: #666; }
+        .header { width: 100%; margin-bottom: 24px; }
+        .header td { vertical-align: top; }
+        .header .right { text-align: right; }
+        table.items { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        table.items th, table.items td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        table.items th { background: #f2f2f2; }
+        table.items td.num, table.items th.num { text-align: right; }
+        .totals { width: 100%; margin-top: 12px; }
+        .totals td { padding: 3px 0; }
+        .totals .label { text-align: right; padding-right: 12px; }
+        .totals .value { text-align: right; width: 100px; }
+        .totals .grand { font-size: 14px; font-weight: bold; border-top: 1px solid #333; }
+        .footer { margin-top: 40px; font-size: 10px; color: #888; }
+    </style>
+</head>
+<body>
+    <table class="header">
+        <tr>
+            <td>
+                <h1>{{ store.name }}</h1>
+                {% if store.companyName %}<div>{{ store.companyName }}</div>{% endif %}
+                {% if store.companyCui %}<div>CUI: {{ store.companyCui }}</div>{% endif %}
+                {% if store.companyRegCom %}<div>Nr. Reg. Com.: {{ store.companyRegCom }}</div>{% endif %}
+                {% if store.companyAddress %}<div>{{ store.companyAddress }}</div>{% endif %}
+                {% if store.email %}<div>{{ store.email }}</div>{% endif %}
+            </td>
+            <td class="right">
+                <h1>Factură / Chitanță</h1>
+                <div>Comandă #{{ order.id }}</div>
+                <div>Data: {{ order.createdAt|date('d.m.Y') }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <div>
+        <strong>Client:</strong> {{ order.shippingFullName }}<br>
+        <span class="muted">
+            {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }},
+            {{ order.shippingPostalCode }} — tel. {{ order.shippingPhone }}
+        </span>
+    </div>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th>Produs</th>
+                <th class="num">Cantitate</th>
+                <th class="num">Preț unitar</th>
+                <th class="num">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items %}
+                <tr>
+                    <td>{{ item.productName }}</td>
+                    <td class="num">{{ item.quantity }}</td>
+                    <td class="num">{{ item.unitPrice }} lei</td>
+                    <td class="num">{{ item.subtotal }} lei</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals">
+        <tr>
+            <td class="label">Transport:</td>
+            <td class="value">{{ order.shippingCost == '0.00' ? 'Gratuit' : (order.shippingCost ~ ' lei') }}</td>
+        </tr>
+        <tr class="grand">
+            <td class="label">Total:</td>
+            <td class="value">{{ order.total }} lei</td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 16px">
+        <strong>Metodă de plată:</strong>
+        {% if order.paymentMethod.value == 'card' %}Card online
+        {% elseif order.paymentMethod.value == 'cod' %}Ramburs la livrare
+        {% else %}Transfer bancar
+        {% endif %}
+        ({{ order.paymentStatus.value == 'paid' ? 'plătită' : 'neplătită încă' }})
+    </div>
+
+    <div class="footer">
+        Document generat automat de {{ store.name }} — nu necesită semnătură/ștampilă.
+    </div>
+</body>
+</html>

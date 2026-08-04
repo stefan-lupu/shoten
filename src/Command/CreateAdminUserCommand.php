@@ -49,6 +49,8 @@ final class CreateAdminUserCommand extends Command
         $user->setLastName($input->getArgument('lastName'));
         $user->setRoles(['ROLE_ADMIN']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $input->getArgument('password')));
+        // Creat direct de developer prin CLI — nu are sens să treacă prin verificarea de email.
+        $user->setVerified(true);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();

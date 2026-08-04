@@ -40,9 +40,17 @@
                                 <li class="list-group-item px-0 text-success small">{{ discount.description }}</li>
                             {% endfor %}
                         </ul>
-                        <p class="mb-1">Subtotal: {{ campaignResult.subtotal }} lei</p>
                     {% endif %}
 
+                    <p class="mb-1">Subtotal: {{ campaignResult.subtotal }} lei</p>
+                    <p class="mb-1">
+                        Transport:
+                        {% if campaignResult.shippingCost == '0.00' %}
+                            <span class="text-success">Gratuit</span>
+                        {% else %}
+                            {{ campaignResult.shippingCost }} lei
+                        {% endif %}
+                    </p>
                     <p class="fs-5 mb-0">Total: <strong>{{ campaignResult.total }} lei</strong></p>
                 </div>
             </div>

@@ -13,6 +13,8 @@
     {% endif %}
 
     {% if query %}
+        {% include 'product/_filter_sort_bar.html.twig' with { formAction: path('app_product_search'), query: query, sort: sort, minPrice: minPrice, maxPrice: maxPrice } %}
+
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
             {% for product in products %}
                 {% include 'product/_card.html.twig' %}
@@ -26,7 +28,7 @@
                 <ul class="pagination">
                     {% for p in 1..totalPages %}
                         <li class="page-item {{ p == page ? 'active' }}">
-                            <a class="page-link" href="{{ path('app_product_search', { q: query, page: p }) }}">{{ p }}</a>
+                            <a class="page-link" href="{{ path('app_product_search', { q: query, page: p, sort: sort, minPrice: minPrice, maxPrice: maxPrice }) }}">{{ p }}</a>
                         </li>
                     {% endfor %}
                 </ul>

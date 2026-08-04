@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Termeni și condiții — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Termeni și condiții</h1>
+    <div class="alert alert-warning">
+        Acest text e un model de pornire, nu conținut juridic final — trebuie
+        revizuit de un avocat înainte de lansarea magazinului în producție.
+    </div>
+
+    <h2 class="h5 mt-4">1. Date de identificare</h2>
+    <p>
+        {{ store.companyName }}, CUI {{ store.companyCui }}, Nr. Reg. Com.
+        {{ store.companyRegCom }}, cu sediul în {{ store.companyAddress }}
+        (denumit în continuare „Vânzătorul"), operează magazinul online
+        disponibil la adresa {{ store.domain }}.
+    </p>
+
+    <h2 class="h5 mt-4">2. Obiectul contractului</h2>
+    <p>
+        Prezentul document reglementează condițiile de vânzare-cumpărare a
+        produselor comercializate prin intermediul magazinului online
+        {{ store.name }}, către persoane fizice cu domiciliul în România.
+    </p>
+
+    <h2 class="h5 mt-4">3. Produse și prețuri</h2>
+    <p>
+        Prețurile afișate sunt exprimate în lei (RON) și includ TVA, unde
+        este cazul. Vânzătorul își rezervă dreptul de a modifica prețurile
+        fără notificare prealabilă, modificările neafectând comenzile deja
+        confirmate.
+    </p>
+
+    <h2 class="h5 mt-4">4. Comanda și încheierea contractului</h2>
+    <p>
+        Contractul se consideră încheiat în momentul confirmării comenzii de
+        către client și al recepționării acesteia de către Vânzător.
+        Clientul primește o confirmare pe email cu detaliile comenzii.
+    </p>
+
+    <h2 class="h5 mt-4">5. Modalități de plată</h2>
+    <p>
+        Plata se poate face online cu cardul, ramburs la livrare sau prin
+        transfer bancar, conform opțiunilor disponibile la finalizarea
+        comenzii.
+    </p>
+
+    <h2 class="h5 mt-4">6. Livrare</h2>
+    <p>
+        Termenele de livrare sunt orientative și depind de disponibilitatea
+        produselor și de curierul ales. Costul de transport este afișat
+        explicit înainte de finalizarea comenzii.
+    </p>
+
+    <h2 class="h5 mt-4">7. Dreptul de retragere</h2>
+    <p>
+        Conform legislației în vigoare, aveți dreptul de a vă retrage din
+        contract în termen de 14 zile calendaristice, fără a fi necesară
+        justificarea deciziei. Detalii complete în
+        <a href="{{ path('app_return_policy') }}">Politica de retur</a>.
+    </p>
+
+    <h2 class="h5 mt-4">8. Garanții și reclamații</h2>
+    <p>
+        Produsele beneficiază de garanțiile legale prevăzute de legislația
+        română privind protecția consumatorilor. Reclamațiile pot fi
+        transmise la {{ store.email }}.
+    </p>
+
+    <h2 class="h5 mt-4">9. Protecția datelor cu caracter personal</h2>
+    <p>
+        Datele personale sunt prelucrate conform
+        <a href="{{ path('app_privacy_policy') }}">Politicii de confidențialitate</a>.
+    </p>
+
+    <h2 class="h5 mt-4">10. Soluționarea litigiilor</h2>
+    <p>
+        În cazul unui litigiu, clienții se pot adresa Autorității Naționale
+        pentru Protecția Consumatorilor (ANPC) sau platformei europene de
+        Soluționare a Litigiilor Online (SOL).
+    </p>
+
+    <h2 class="h5 mt-4">11. Dispoziții finale</h2>
+    <p>
+        Vânzătorul își rezervă dreptul de a modifica acești termeni și
+        condiții. Versiunea aplicabilă este cea publicată la data plasării
+        comenzii.
+    </p>
+{% endblock %}

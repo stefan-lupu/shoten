@@ -13,4 +13,16 @@ final class PageController extends AbstractController
     {
         return $this->render('page/privacy_policy.html.twig');
     }
+
+    #[Route('/termeni-si-conditii', name: 'app_terms')]
+    public function terms(): Response
+    {
+        return $this->render('page/terms.html.twig');
+    }
+
+    #[Route('/politica-retur', name: 'app_return_policy')]
+    public function returnPolicy(): Response
+    {
+        return $this->render('page/return_policy.html.twig');
+    }
 }

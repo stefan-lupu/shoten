@@ -7,6 +7,8 @@ use App\Entity\User;
 use App\Enum\PaymentMethod;
 use App\Enum\PaymentStatus;
 use App\Repository\OrderRepository;
+use App\Service\InvoicePdfService;
+use App\Service\OrderService;
 use App\Service\Payment\CardPaymentService;
 use App\Service\StoreConfig;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,6 +61,22 @@ final class OrderController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/factura', name: 'app_order_invoice')]
+    public function invoice(Order $order, InvoicePdfService $invoicePdfService): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user && !$this->isGranted('ROLE_ORDERS_VIEWER')) {
+            throw new AccessDeniedHttpException('Această comandă nu îți aparține.');
+        }
+
+        return new Response($invoicePdfService->generate($order), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => sprintf('inline; filename="factura-comanda-%d.pdf"', $order->getId()),
+        ]);
+    }
+
     #[Route('/{id}/reincearca-plata', name: 'app_order_retry_payment', methods: ['POST'])]
     public function retryPayment(Order $order, Request $request, CardPaymentService $cardPaymentService): RedirectResponse
     {
@@ -78,5 +96,29 @@ final class OrderController extends AbstractController
         }
 
         return new RedirectResponse($cardPaymentService->createPaymentSession($order));
+    }
+
+    #[Route('/{id}/anuleaza', name: 'app_order_cancel', methods: ['POST'])]
+    public function cancel(Order $order, Request $request, OrderService $orderService): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            throw new AccessDeniedHttpException('Această comandă nu îți aparține.');
+        }
+
+        if (!$this->isCsrfTokenValid('order_cancel_'.$order->getId(), $request->request->get('_token'))) {
+            throw new AccessDeniedHttpException('Token CSRF invalid.');
+        }
+
+        try {
+            $orderService->cancelOrder($order);
+            $this->addFlash('success', 'Comanda a fost anulată.');
+        } catch (\DomainException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
     }
 }

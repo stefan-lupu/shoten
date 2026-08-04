@@ -63,6 +63,13 @@ class Order
     private ?string $total = null;
 
     /**
+     * Cost transport la momentul comenzii — deja inclus în `total`, păstrat
+     * separat doar pentru afișare (linie distinctă pe comandă/factură).
+     */
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $shippingCost = '0.00';
+
+    /**
      * Codul de cupon folosit la plasarea comenzii, dacă a fost cazul —
      * doar pentru trasabilitate/afișare, nu recalculează nimic.
      */
@@ -237,6 +244,18 @@ class Order
     public function setTotal(string $total): static
     {
         $this->total = $total;
+
+        return $this;
+    }
+
+    public function getShippingCost(): string
+    {
+        return $this->shippingCost;
+    }
+
+    public function setShippingCost(string $shippingCost): static
+    {
+        $this->shippingCost = $shippingCost;
 
         return $this;
     }

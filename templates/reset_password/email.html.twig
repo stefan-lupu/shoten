@@ -1,0 +1,11 @@
+<p>Bună,</p>
+
+<p>Pentru a-ți reseta parola la {{ store.name }}, accesează link-ul de mai jos:</p>
+
+<a href="{{ url('app_reset_password', {token: resetToken.token}) }}">{{ url('app_reset_password', {token: resetToken.token}) }}</a>
+
+<p>Acest link expiră în {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+
+<p>Dacă nu ai solicitat această resetare, poți ignora acest email.</p>
+
+<p>Echipa {{ store.name }}</p>

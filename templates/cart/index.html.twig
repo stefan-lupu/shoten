@@ -79,6 +79,14 @@
         {% if campaignResult.discounts is not empty %}
             <p class="mb-1 text-success">Reducere totală: −{{ campaignResult.getTotalDiscount }} lei</p>
         {% endif %}
+        <p class="mb-1">
+            Transport:
+            {% if campaignResult.shippingCost == '0.00' %}
+                <span class="text-success">Gratuit</span>
+            {% else %}
+                {{ campaignResult.shippingCost }} lei
+            {% endif %}
+        </p>
         <p class="fs-5">Total: <strong>{{ campaignResult.total }} lei</strong></p>
 
         {% if is_granted('ROLE_USER') %}

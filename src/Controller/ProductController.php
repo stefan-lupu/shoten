@@ -3,11 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Review;
+use App\Entity\StockNotificationRequest;
+use App\Enum\StockStatus;
 use App\Form\ReviewType;
+use App\Form\StockNotificationRequestType;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
+use App\Service\StockNotificationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -34,8 +39,11 @@ final class ProductController extends AbstractController
         }
 
         $page = max(1, $request->query->getInt('page', 1));
+        $sort = $request->query->get('sort');
+        $minPrice = $request->query->get('minPrice');
+        $maxPrice = $request->query->get('maxPrice');
         $categoryIds = $categoryRepository->getSelfAndDescendantIds($category);
-        $products = $productRepository->paginateByCategoryIds($categoryIds, $page, self::PER_PAGE);
+        $products = $productRepository->paginateByCategoryIds($categoryIds, $page, self::PER_PAGE, $sort, $minPrice, $maxPrice);
         $totalPages = (int) ceil(count($products) / self::PER_PAGE);
 
         return $this->render('product/category.html.twig', [
@@ -43,6 +51,9 @@ final class ProductController extends AbstractController
             'products' => $products,
             'page' => $page,
             'totalPages' => $totalPages,
+            'sort' => $sort,
+            'minPrice' => $minPrice,
+            'maxPrice' => $maxPrice,
         ]);
     }
 
@@ -51,11 +62,14 @@ final class ProductController extends AbstractController
     {
         $query = trim((string) $request->query->get('q', ''));
         $page = max(1, $request->query->getInt('page', 1));
+        $sort = $request->query->get('sort');
+        $minPrice = $request->query->get('minPrice');
+        $maxPrice = $request->query->get('maxPrice');
 
         $products = [];
         $totalPages = 0;
         if ('' !== $query) {
-            $products = $productRepository->paginateSearch($query, $page, self::PER_PAGE);
+            $products = $productRepository->paginateSearch($query, $page, self::PER_PAGE, $sort, $minPrice, $maxPrice);
             $totalPages = (int) ceil(count($products) / self::PER_PAGE);
         }
 
@@ -64,6 +78,9 @@ final class ProductController extends AbstractController
             'products' => $products,
             'page' => $page,
             'totalPages' => $totalPages,
+            'sort' => $sort,
+            'minPrice' => $minPrice,
+            'maxPrice' => $maxPrice,
         ]);
     }
 
@@ -86,12 +103,43 @@ final class ProductController extends AbstractController
             }
         }
 
+        $stockNotificationForm = null;
+        if (StockStatus::InStock === $product->getStockStatus() && $product->getStock() <= 0) {
+            $stockNotificationForm = $this->createForm(
+                StockNotificationRequestType::class,
+                (new StockNotificationRequest())->setProduct($product),
+            );
+        }
+
         return $this->render('product/show.html.twig', [
             'product' => $product,
             'reviews' => $reviewRepository->findApprovedByProduct($product),
             'averageRating' => $reviewRepository->getAverageRating($product),
             'reviewForm' => $reviewForm?->createView(),
             'hasReviewed' => $hasReviewed,
+            'stockNotificationForm' => $stockNotificationForm?->createView(),
         ]);
+    }
+
+    #[Route('/produs/{slug}/anunta-ma', name: 'app_product_notify_stock', methods: ['POST'])]
+    public function notifyStock(string $slug, Request $request, ProductRepository $productRepository, StockNotificationService $stockNotificationService): RedirectResponse
+    {
+        $product = $productRepository->findOneBy(['slug' => $slug]);
+        if (!$product) {
+            throw new NotFoundHttpException('Produsul nu a fost găsit.');
+        }
+
+        $notificationRequest = (new StockNotificationRequest())->setProduct($product);
+        $form = $this->createForm(StockNotificationRequestType::class, $notificationRequest);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $stockNotificationService->subscribe($product, $notificationRequest->getEmail());
+            $this->addFlash('success', 'Te anunțăm pe email când produsul revine în stoc.');
+        } else {
+            $this->addFlash('error', 'Introdu o adresă de email validă.');
+        }
+
+        return $this->redirectToRoute('app_product_show', ['slug' => $slug]);
     }
 }

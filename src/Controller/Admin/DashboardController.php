@@ -80,6 +80,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Utilizatori')->setPermission('ROLE_ADMIN');
         yield MenuItem::linkTo(UserCrudController::class, 'Utilizatori', 'fa fa-users')->setPermission('ROLE_ADMIN');
 
+        yield MenuItem::section('Setări')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkTo(ShippingSettingsCrudController::class, 'Transport', 'fa fa-truck')->setPermission('ROLE_ADMIN');
+
         yield MenuItem::section();
         yield MenuItem::linkToUrl('Vezi magazinul', 'fa fa-external-link-alt', '/');
     }

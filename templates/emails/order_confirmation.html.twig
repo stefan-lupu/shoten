@@ -26,6 +26,7 @@
             </tbody>
         </table>
 
+        <p>Transport: {{ order.shippingCost == '0.00' ? 'Gratuit' : order.shippingCost ~ ' lei' }}</p>
         <p><strong>Total: {{ order.total }} lei</strong></p>
 
         <p>

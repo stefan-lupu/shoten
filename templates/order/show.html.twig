@@ -47,7 +47,17 @@
         </table>
     </div>
 
+    <p class="mb-1">
+        Transport:
+        {% if order.shippingCost == '0.00' %}
+            <span class="text-success">Gratuit</span>
+        {% else %}
+            {{ order.shippingCost }} lei
+        {% endif %}
+    </p>
     <p class="fs-5">Total: <strong>{{ order.total }} lei</strong></p>
+
+    <a href="{{ path('app_order_invoice', { id: order.id }) }}" class="btn btn-outline-secondary" target="_blank">Descarcă factura (PDF)</a>
 
     {% if order.paymentMethod.value == 'bank_transfer' and order.paymentStatus.value != 'paid' %}
         <div class="card mb-3">
@@ -62,9 +72,16 @@
     {% endif %}
 
     {% if order.paymentMethod.value == 'card' and order.paymentStatus.value != 'paid' %}
-        <form method="post" action="{{ path('app_order_retry_payment', { id: order.id }) }}">
+        <form method="post" action="{{ path('app_order_retry_payment', { id: order.id }) }}" class="d-inline">
             <input type="hidden" name="_token" value="{{ csrf_token('order_retry_payment_' ~ order.id) }}">
             <button type="submit" class="btn btn-primary">Reîncearcă plata</button>
+        </form>
+    {% endif %}
+
+    {% if order.status.value == 'pending' %}
+        <form method="post" action="{{ path('app_order_cancel', { id: order.id }) }}" class="d-inline" data-confirm="Sigur anulezi această comandă?">
+            <input type="hidden" name="_token" value="{{ csrf_token('order_cancel_' ~ order.id) }}">
+            <button type="submit" class="btn btn-outline-danger">Anulează comanda</button>
         </form>
     {% endif %}
 {% endblock %}

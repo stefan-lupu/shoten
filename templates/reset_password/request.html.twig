@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Resetează parola — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <div class="mx-auto" style="max-width: 28rem">
+        {% for flash_error in app.flashes('reset_password_error') %}
+            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+        {% endfor %}
+        <h1 class="mb-3">Resetează parola</h1>
+
+        {{ form_start(requestForm) }}
+            {{ form_row(requestForm.email, { label: 'Email' }) }}
+            <div class="mb-3">
+                <small class="text-body-secondary">
+                    Introdu adresa de email și îți trimitem un link pentru
+                    resetarea parolei.
+                </small>
+            </div>
+
+            <button class="btn btn-primary">Trimite email de resetare</button>
+        {{ form_end(requestForm) }}
+    </div>
+{% endblock %}

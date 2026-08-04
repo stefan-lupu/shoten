@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use App\Enum\StockStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,6 +14,16 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProductRepository extends ServiceEntityRepository
 {
+    /**
+     * Chei valide pentru parametrul `sort` din URL (căutare/categorie).
+     */
+    private const array SORT_OPTIONS = [
+        'price_asc' => ['p.price', 'ASC'],
+        'price_desc' => ['p.price', 'DESC'],
+        'newest' => ['p.createdAt', 'DESC'],
+        'name' => ['p.name', 'ASC'],
+    ];
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
@@ -56,32 +67,48 @@ class ProductRepository extends ServiceEntityRepository
      *
      * @param int[] $categoryIds
      */
-    public function paginateByCategoryIds(array $categoryIds, int $page, int $perPage = 12): Paginator
+    public function paginateByCategoryIds(array $categoryIds, int $page, int $perPage = 12, ?string $sort = null, ?string $minPrice = null, ?string $maxPrice = null): Paginator
     {
-        $query = $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p')
             ->andWhere('p.category IN (:categoryIds)')
             ->setParameter('categoryIds', $categoryIds)
-            ->orderBy('p.name', 'ASC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
-            ->getQuery()
         ;
+        $this->applyPriceRange($qb, $minPrice, $maxPrice);
+        $this->applySort($qb, $sort);
 
-        return new Paginator($query);
+        return new Paginator($qb->getQuery());
     }
 
-    public function paginateSearch(string $query, int $page, int $perPage = 12): Paginator
+    public function paginateSearch(string $query, int $page, int $perPage = 12, ?string $sort = null, ?string $minPrice = null, ?string $maxPrice = null): Paginator
     {
         $qb = $this->createQueryBuilder('p')
             ->andWhere('p.name LIKE :query OR p.description LIKE :query')
             ->setParameter('query', '%'.$query.'%')
-            ->orderBy('p.name', 'ASC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
-            ->getQuery()
         ;
+        $this->applyPriceRange($qb, $minPrice, $maxPrice);
+        $this->applySort($qb, $sort);
 
-        return new Paginator($qb);
+        return new Paginator($qb->getQuery());
+    }
+
+    private function applySort(QueryBuilder $qb, ?string $sort): void
+    {
+        [$field, $direction] = self::SORT_OPTIONS[$sort] ?? self::SORT_OPTIONS['name'];
+        $qb->orderBy($field, $direction);
+    }
+
+    private function applyPriceRange(QueryBuilder $qb, ?string $minPrice, ?string $maxPrice): void
+    {
+        if (null !== $minPrice && is_numeric($minPrice)) {
+            $qb->andWhere('p.price >= :minPrice')->setParameter('minPrice', $minPrice);
+        }
+        if (null !== $maxPrice && is_numeric($maxPrice)) {
+            $qb->andWhere('p.price <= :maxPrice')->setParameter('maxPrice', $maxPrice);
+        }
     }
 
     /**

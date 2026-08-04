@@ -82,6 +82,7 @@ final class OrderService
                 ->setPaymentMethod($data->paymentMethod)
                 ->setPaymentStatus(PaymentStatus::Pending)
                 ->setTotal($campaignResult->total)
+                ->setShippingCost($campaignResult->shippingCost)
                 ->setCouponCode($couponCode ?: null)
             ;
 
@@ -130,6 +131,27 @@ final class OrderService
             $this->sendConfirmationEmail($order);
 
             return $order;
+        });
+    }
+
+    /**
+     * @throws \DomainException dacă statusul nu (mai) permite anularea
+     */
+    public function cancelOrder(Order $order): void
+    {
+        if (OrderStatus::Pending !== $order->getStatus()) {
+            throw new \DomainException('Doar comenzile în așteptare pot fi anulate.');
+        }
+
+        $this->entityManager->wrapInTransaction(function () use ($order) {
+            foreach ($order->getItems() as $item) {
+                $product = $item->getProduct();
+                if ($product && $product->getStockStatus() === StockStatus::InStock) {
+                    $product->setStock($product->getStock() + $item->getQuantity());
+                }
+            }
+
+            $order->setStatus(OrderStatus::Cancelled);
         });
     }
 

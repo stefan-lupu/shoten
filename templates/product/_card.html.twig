@@ -16,7 +16,7 @@
         <div class="card-body pt-2">
             <form method="post" action="{{ path('app_cart_add', { product: product.id }) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
-                <button type="submit" class="btn btn-primary btn-sm w-100" {% if product.stockStatus.value != 'in_stock' %}disabled{% endif %}>Adaugă în coș</button>
+                <button type="submit" class="btn btn-primary btn-sm w-100" {% if product.stockStatus.value != 'in_stock' or product.stock <= 0 %}disabled{% endif %}>Adaugă în coș</button>
             </form>
         </div>
     </div>

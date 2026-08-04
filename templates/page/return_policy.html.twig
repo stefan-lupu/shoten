@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politica de retur — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Politica de retur</h1>
+    <div class="alert alert-warning">
+        Acest text e un model de pornire, nu conținut juridic final — trebuie
+        revizuit de un avocat înainte de lansarea magazinului în producție.
+    </div>
+
+    <h2 class="h5 mt-4">Dreptul de retragere</h2>
+    <p>
+        Conform Ordonanței de Urgență nr. 34/2014 (transpunere a Directivei
+        2011/83/UE), aveți dreptul de a vă retrage din contract în termen
+        de <strong>14 zile calendaristice</strong> de la data la care intrați
+        în posesia fizică a produsului, fără a fi necesar să justificați
+        decizia și fără costuri suplimentare, cu excepția celor prevăzute
+        mai jos.
+    </p>
+
+    <h2 class="h5 mt-4">Cum vă exercitați dreptul de retragere</h2>
+    <p>
+        Ne puteți informa despre decizia de retragere printr-o declarație
+        neechivocă (email la {{ store.email }} sau scrisoare), incluzând
+        numărul comenzii. Termenul se consideră respectat dacă trimiteți
+        notificarea înainte de expirarea celor 14 zile.
+    </p>
+
+    <h2 class="h5 mt-4">Returnarea produsului</h2>
+    <p>
+        Produsul trebuie returnat în cel mult 14 zile calendaristice de la
+        comunicarea deciziei de retragere, nefolosit, în ambalajul original,
+        cu toate accesoriile și documentele însoțitoare. Costul returnării
+        este suportat de client, cu excepția cazului în care produsul livrat
+        a fost defect sau necorespunzător descrierii.
+    </p>
+
+    <h2 class="h5 mt-4">Rambursarea</h2>
+    <p>
+        Rambursăm toate sumele primite de la dvs. (inclusiv costul livrării
+        inițiale, la nivelul celei mai ieftine opțiuni oferite) în cel mult
+        14 zile de la data la care suntem informați despre decizia de
+        retragere sau, dacă e mai târziu, de la primirea produsului returnat.
+        Rambursarea se face prin aceeași metodă de plată folosită la
+        comandă, dacă nu s-a convenit altfel.
+    </p>
+
+    <h2 class="h5 mt-4">Excepții de la dreptul de retragere</h2>
+    <p>
+        Dreptul de retragere nu se aplică, printre altele, produselor
+        personalizate/confecționate după specificațiile clientului sau
+        produselor sigilate care nu pot fi returnate din motive de igienă,
+        dacă au fost desigilate după livrare.
+    </p>
+
+    <h2 class="h5 mt-4">Litigii</h2>
+    <p>
+        Pentru orice nelămurire ne puteți contacta la {{ store.email }}.
+        Dacă nu ajungem la o soluție amiabilă, vă puteți adresa Autorității
+        Naționale pentru Protecția Consumatorilor
+        (<a href="https://anpc.ro" target="_blank" rel="noopener">anpc.ro</a>)
+        sau platformei europene de Soluționare a Litigiilor Online
+        (<a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>).
+    </p>
+{% endblock %}

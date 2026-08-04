@@ -9,4 +9,18 @@
         <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
         <a href="{{ path('app_address_index') }}" class="btn btn-outline-primary">Adresele mele</a>
     </div>
+
+    <hr class="my-4">
+
+    <h2 class="h5">Zona de pericol</h2>
+    <p class="text-body-secondary">
+        Ștergerea contului îți anonimizează datele personale (nume, email,
+        telefon) și îți șterge adresele salvate. Comenzile deja plasate
+        rămân, din motive de evidență contabilă, dar nu mai sunt asociate
+        cu datele tale de identificare.
+    </p>
+    <form method="post" action="{{ path('app_account_delete') }}" data-confirm="Sigur vrei să îți ștergi contul? Această acțiune nu poate fi anulată.">
+        <input type="hidden" name="_token" value="{{ csrf_token('account_delete') }}">
+        <button type="submit" class="btn btn-outline-danger">Șterge contul</button>
+    </form>
 {% endblock %}

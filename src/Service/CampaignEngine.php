@@ -7,6 +7,7 @@ use App\Entity\Campaign;
 use App\Entity\Cart;
 use App\Enum\CampaignType;
 use App\Repository\CampaignRepository;
+use App\Repository\ShippingSettingsRepository;
 use App\Service\Campaign\Strategy\CampaignStrategyInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
@@ -42,6 +43,7 @@ final class CampaignEngine
         #[AutowireIterator('app.campaign_strategy')]
         private readonly iterable $strategies,
         private readonly CampaignRepository $campaignRepository,
+        private readonly ShippingSettingsRepository $shippingSettingsRepository,
     ) {
     }
 
@@ -120,11 +122,30 @@ final class CampaignEngine
             $total = '0.00';
         }
 
+        $shippingCost = $this->calculateShippingCost($subtotal);
+        $total = bcadd($total, $shippingCost, 2);
+
         return new CampaignResult(
             subtotal: $subtotal,
+            shippingCost: $shippingCost,
             total: $total,
             discounts: $discounts,
             couponError: $couponError,
         );
+    }
+
+    private function calculateShippingCost(string $subtotal): string
+    {
+        if (bccomp($subtotal, '0.00', 2) <= 0) {
+            return '0.00';
+        }
+
+        $settings = $this->shippingSettingsRepository->getSettings();
+        $threshold = $settings->getFreeShippingThreshold();
+        if (null !== $threshold && bccomp($subtotal, $threshold, 2) >= 0) {
+            return '0.00';
+        }
+
+        return $settings->getCost();
     }
 }

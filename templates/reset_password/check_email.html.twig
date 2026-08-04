@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Verifică-ți emailul — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <div class="mx-auto" style="max-width: 28rem">
+        <h1 class="mb-3">Verifică-ți emailul</h1>
+        <p>
+            Dacă există un cont cu adresa de email introdusă, ți-am trimis un
+            email cu un link pentru resetarea parolei. Link-ul expiră în
+            {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+        </p>
+        <p>
+            Dacă nu primești emailul, verifică folderul de spam sau
+            <a href="{{ path('app_forgot_password_request') }}">încearcă din nou</a>.
+        </p>
+    </div>
+{% endblock %}

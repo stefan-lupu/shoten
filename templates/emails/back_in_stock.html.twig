@@ -1,0 +1,10 @@
+<p>Bună,</p>
+
+<p>Produsul <strong>{{ product.name }}</strong> a revenit în stoc la {{ store.name }}!</p>
+
+<p>
+    <a href="{{ absolute_url(path('app_product_show', { slug: product.slug })) }}">Vezi produsul</a>
+    — {{ product.price }} lei
+</p>
+
+<p>Echipa {{ store.name }}</p>

@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Enum\StockStatus;
 use App\Form\ProductImageType;
+use App\Service\StockNotificationService;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -23,6 +25,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_STOCK_MANAGER')]
 class ProductCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private readonly StockNotificationService $stockNotificationService,
+    ) {
+    }
+
     public static function getEntityFqcn(): string
     {
         return Product::class;
@@ -78,5 +85,18 @@ class ProductCrudController extends AbstractCrudController
             ->hideOnIndex()
         ;
         yield DateTimeField::new('createdAt')->hideOnForm();
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        // Valoarea din DB înainte ca formularul să-și suprascrie datele pe entitate,
+        // ca să detectăm exact tranziția 0 → disponibil (nu doar orice modificare de stoc).
+        $previousStock = (int) ($entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance)['stock'] ?? 0);
+
+        parent::updateEntity($entityManager, $entityInstance);
+
+        if ($entityInstance instanceof Product) {
+            $this->stockNotificationService->notifyIfBackInStock($entityInstance, $previousStock);
+        }
     }
 }

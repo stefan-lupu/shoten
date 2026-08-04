@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Parolă nouă — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <div class="mx-auto" style="max-width: 28rem">
+        <h1 class="mb-3">Alege o parolă nouă</h1>
+
+        {{ form_start(resetForm) }}
+            {{ form_row(resetForm.plainPassword, { label: 'Parolă nouă' }) }}
+            <button class="btn btn-primary mt-2">Salvează parola nouă</button>
+        {{ form_end(resetForm) }}
+    </div>
+{% endblock %}

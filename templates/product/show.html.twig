@@ -77,14 +77,26 @@
             <p class="text-body-secondary">Origine: {{ product.origin }}</p>
             <p>{{ product.description }}</p>
 
-            <form method="post" action="{{ path('app_cart_add', { product: product.id }) }}" class="add-to-cart-form d-flex align-items-end gap-2 mt-4">
-                <div>
-                    <label for="quantity" class="form-label">Cantitate</label>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" {% if product.stockStatus.value == 'in_stock' %}max="{{ product.stock }}"{% endif %} class="form-control" style="width: 6rem">
+            {% if stockNotificationForm %}
+                <div class="mt-4">
+                    <p class="text-body-secondary mb-2">Produsul e epuizat momentan. Lasă-ți emailul și te anunțăm imediat ce revine în stoc.</p>
+                    {{ form_start(stockNotificationForm, { action: path('app_product_notify_stock', { slug: product.slug }) }) }}
+                        <div class="d-flex gap-2">
+                            {{ form_widget(stockNotificationForm.email) }}
+                            <button type="submit" class="btn btn-primary text-nowrap">Anunță-mă</button>
+                        </div>
+                    {{ form_end(stockNotificationForm) }}
                 </div>
-                <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
-                <button type="submit" class="btn btn-primary">Adaugă în coș</button>
-            </form>
+            {% else %}
+                <form method="post" action="{{ path('app_cart_add', { product: product.id }) }}" class="add-to-cart-form d-flex align-items-end gap-2 mt-4">
+                    <div>
+                        <label for="quantity" class="form-label">Cantitate</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" {% if product.stockStatus.value == 'in_stock' %}max="{{ product.stock }}"{% endif %} class="form-control" style="width: 6rem">
+                    </div>
+                    <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
+                    <button type="submit" class="btn btn-primary">Adaugă în coș</button>
+                </form>
+            {% endif %}
         </div>
     </div>
 
