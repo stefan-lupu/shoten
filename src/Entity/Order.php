@@ -73,6 +73,14 @@ class Order
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
+     * Setat prima dată când se trimite evenimentul de conversie către
+     * Google Ads pentru această comandă — garantează că se trimite o
+     * singură dată, indiferent de câte ori e revizitată pagina comenzii.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $adsConversionSentAt = null;
+
+    /**
      * @var Collection<int, OrderItem>
      */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist'])]
@@ -248,6 +256,18 @@ class Order
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getAdsConversionSentAt(): ?\DateTimeImmutable
+    {
+        return $this->adsConversionSentAt;
+    }
+
+    public function markAdsConversionSent(): static
+    {
+        $this->adsConversionSentAt = new \DateTimeImmutable();
+
+        return $this;
     }
 
     /**

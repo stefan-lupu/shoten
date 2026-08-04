@@ -8,6 +8,8 @@ use App\Enum\PaymentMethod;
 use App\Enum\PaymentStatus;
 use App\Repository\OrderRepository;
 use App\Service\Payment\CardPaymentService;
+use App\Service\StoreConfig;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +34,7 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_show')]
-    public function show(Order $order): Response
+    public function show(Order $order, Request $request, EntityManagerInterface $entityManager, StoreConfig $store): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -41,8 +43,19 @@ final class OrderController extends AbstractController
             throw new AccessDeniedHttpException('Această comandă nu îți aparține.');
         }
 
+        // Se trimite o singură dată per comandă (flag persistat), și doar
+        // dacă userul și-a dat deja acordul pentru cookie-uri de publicitate —
+        // altfel rămâne netrimis până la o vizită ulterioară cu consimțământ dat.
+        $cookieConsentAccepted = 'accepted' === $request->cookies->get('cookie_consent');
+        $fireAdsConversion = $cookieConsentAccepted && $store->googleAdsConversionId && null === $order->getAdsConversionSentAt();
+        if ($fireAdsConversion) {
+            $order->markAdsConversionSent();
+            $entityManager->flush();
+        }
+
         return $this->render('order/show.html.twig', [
             'order' => $order,
+            'fireAdsConversion' => $fireAdsConversion,
         ]);
     }
 

@@ -2,6 +2,22 @@
 
 {% block title %}Comanda #{{ order.id }} — {{ store.name }}{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {% if fireAdsConversion %}
+        {# gtag() e deja definit în base.html.twig (aceleași condiții: consimțământ + ID Ads setat).
+           Doar valoarea comenzii și un ID de tranzacție anonim (id-ul comenzii) — fără nume/email, conform politicilor Google Ads. #}
+        <script>
+            gtag('event', 'conversion', {
+                'send_to': {{ store.googleAdsConversionId|json_encode|raw }},
+                'value': {{ order.total|json_encode|raw }},
+                'currency': 'RON',
+                'transaction_id': {{ ('order-' ~ order.id)|json_encode|raw }}
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
 {% block body %}
     <h1 class="mb-3">Comanda #{{ order.id }}</h1>
     <p>Status: {% include 'order/_status_badge.html.twig' with { status: order.status } %}</p>

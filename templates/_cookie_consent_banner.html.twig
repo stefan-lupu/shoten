@@ -1,0 +1,13 @@
+<div data-controller="cookie-consent" class="d-none position-fixed bottom-0 start-0 end-0 bg-dark text-white p-3" style="z-index: 1050">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <p class="mb-0 small">
+            Folosim cookie-uri pentru analiză de trafic și reclame (Google Analytics, Google Ads, AdSense).
+            Le activăm doar cu acordul tău —
+            <a href="{{ path('app_privacy_policy') }}" class="link-light">detalii în politica de confidențialitate</a>.
+        </p>
+        <div class="d-flex gap-2 flex-shrink-0">
+            <button type="button" class="btn btn-outline-light btn-sm" data-action="cookie-consent#refuse">Refuz</button>
+            <button type="button" class="btn btn-primary btn-sm" data-action="cookie-consent#accept">Accept</button>
+        </div>
+    </div>
+</div>

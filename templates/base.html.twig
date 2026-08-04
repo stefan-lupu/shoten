@@ -45,16 +45,19 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
 
-        {% if store.googleAnalyticsId %}
-            <script async src="https://www.googletagmanager.com/gtag/js?id={{ store.googleAnalyticsId }}"></script>
+        {# Scripturile Google (Analytics/Ads/AdSense) încarcă doar cu consimțământ explicit — vezi _cookie_consent_banner.html.twig. #}
+        {% set cookieConsentAccepted = app.request.cookies.get('cookie_consent') == 'accepted' %}
+        {% if cookieConsentAccepted and (store.googleAnalyticsId or store.googleAdsConversionId) %}
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{ store.googleAnalyticsId ?: store.googleAdsConversionId }}"></script>
             <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '{{ store.googleAnalyticsId }}');
+                {% if store.googleAnalyticsId %}gtag('config', '{{ store.googleAnalyticsId }}');{% endif %}
+                {% if store.googleAdsConversionId %}gtag('config', '{{ store.googleAdsConversionId }}');{% endif %}
             </script>
         {% endif %}
-        {% if store.adsenseClientId %}
+        {% if cookieConsentAccepted and store.adsenseClientId %}
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ store.adsenseClientId }}" crossorigin="anonymous"></script>
         {% endif %}
 
@@ -140,6 +143,15 @@
                     {{ render(controller('App\\Controller\\NewsletterController::widget')) }}
                 </div>
             </div>
+            {% if app.request.attributes.get('_route') not in ['app_checkout', 'app_payment_simulate'] %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        {% include '_adsense_slot.html.twig' with { slotId: '1234567890' } %}
+                    </div>
+                </div>
+            {% endif %}
         </footer>
+
+        {% include '_cookie_consent_banner.html.twig' %}
     </body>
 </html>

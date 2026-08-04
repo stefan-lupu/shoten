@@ -33,6 +33,13 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
         {% for product in products %}
             {% include 'product/_card.html.twig' %}
+            {% if loop.index == 8 and not loop.last %}
+                {# Un singur slot discret la mijlocul listării — nu pe fiecare produs. #}
+                <div class="w-100"></div>
+                <div class="col-12">
+                    {% include '_adsense_slot.html.twig' with { slotId: '2345678901' } %}
+                </div>
+            {% endif %}
         {% else %}
             <p>Nu există produse în această categorie.</p>
         {% endfor %}
