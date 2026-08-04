@@ -41,12 +41,19 @@ final class CheckoutController extends AbstractController
             return $this->redirectToRoute('app_cart');
         }
 
+        $addresses = $addressRepository->findByUser($user);
+        if (!$addresses) {
+            $this->addFlash('error', 'Adaugă mai întâi o adresă de livrare.');
+
+            return $this->redirectToRoute('app_address_new', ['redirect_to' => 'checkout']);
+        }
+
         $couponCode = $request->getSession()->get(CartController::COUPON_SESSION_KEY);
 
-        $defaultAddress = $addressRepository->findOneBy(['user' => $user, 'isDefault' => true]);
-        $data = CheckoutData::fromAddress($defaultAddress);
+        $data = new CheckoutData();
+        $data->address = $addresses[0]; // findByUser sortează implicit adresa principală prima.
 
-        $form = $this->createForm(CheckoutType::class, $data);
+        $form = $this->createForm(CheckoutType::class, $data, ['addresses' => $addresses]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

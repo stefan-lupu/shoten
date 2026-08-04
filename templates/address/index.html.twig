@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Adresele mele — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">Adresele mele</h1>
+
+    {% if addresses is empty %}
+        <p>Nu ai nicio adresă salvată încă.</p>
+    {% else %}
+        <div class="row g-3 mb-4">
+            {% for address in addresses %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            {% if address.default %}
+                                <span class="badge stock-badge stock-badge--in-stock mb-2">Principală</span>
+                            {% endif %}
+                            <p class="mb-1"><strong>{{ address.fullName }}</strong></p>
+                            <p class="mb-1">{{ address.street }}, {{ address.city }}, {{ address.county }}, {{ address.postalCode }}</p>
+                            <p class="mb-3">Tel. {{ address.phone }}</p>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ path('app_address_edit', { id: address.id }) }}" class="btn btn-sm btn-outline-secondary">Editează</a>
+                                {% if not address.default %}
+                                    <form method="post" action="{{ path('app_address_set_default', { id: address.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Setează ca principală</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{{ path('app_address_delete', { id: address.id }) }}" data-confirm="Sigur ștergi această adresă?">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Șterge</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <a href="{{ path('app_address_new') }}" class="btn btn-primary">Adaugă o adresă nouă</a>
+{% endblock %}

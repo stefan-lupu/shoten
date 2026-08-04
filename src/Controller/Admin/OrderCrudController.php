@@ -91,12 +91,15 @@ class OrderCrudController extends AbstractCrudController
         ;
         yield NumberField::new('total', 'Total (lei)')->setNumDecimals(2)->hideOnForm();
         yield TextField::new('couponCode', 'Cod cupon')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingFullName', 'Nume destinatar')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingPhone', 'Telefon')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingStreet', 'Stradă')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingCity', 'Localitate')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingCounty', 'Județ')->hideOnIndex()->hideOnForm();
-        yield TextField::new('shippingPostalCode', 'Cod poștal')->hideOnIndex()->hideOnForm();
+        // Adresa de livrare e singurul lucru editabil liber pe o comandă
+        // (ex: client sună să corecteze o greșeală înainte de expediere) —
+        // restul (status, plată) trece doar prin acțiunile dedicate de mai sus.
+        yield TextField::new('shippingFullName', 'Nume destinatar')->hideOnIndex();
+        yield TextField::new('shippingPhone', 'Telefon')->hideOnIndex();
+        yield TextField::new('shippingStreet', 'Stradă')->hideOnIndex();
+        yield TextField::new('shippingCity', 'Localitate')->hideOnIndex();
+        yield TextField::new('shippingCounty', 'Județ')->hideOnIndex();
+        yield TextField::new('shippingPostalCode', 'Cod poștal')->hideOnIndex();
         yield DateTimeField::new('createdAt', 'Data')->hideOnForm();
     }
 
@@ -135,7 +138,7 @@ class OrderCrudController extends AbstractCrudController
         ;
 
         return $actions
-            ->disable(Action::NEW, Action::EDIT, Action::DELETE)
+            ->disable(Action::NEW, Action::DELETE)
             ->add(Crud::PAGE_INDEX, $markPaid)
             ->add(Crud::PAGE_INDEX, $markShipped)
             ->add(Crud::PAGE_DETAIL, $markPaid)
@@ -144,6 +147,8 @@ class OrderCrudController extends AbstractCrudController
             // vede/poate declanșa doar acțiunea din aria lui (ROLE_ADMIN le are pe amândouă).
             ->setPermission('markPaid', 'ROLE_FINANCE_MANAGER')
             ->setPermission('markShipped', 'ROLE_ORDERS_MANAGER')
+            // Doar adminii pot corecta adresa de livrare a unei comenzi.
+            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
         ;
     }
 

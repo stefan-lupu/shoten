@@ -5,5 +5,8 @@
 {% block body %}
     <h1 class="mb-3">Contul meu</h1>
     <p>Salut, {{ app.user.firstName }}!</p>
-    <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
+        <a href="{{ path('app_address_index') }}" class="btn btn-outline-primary">Adresele mele</a>
+    </div>
 {% endblock %}

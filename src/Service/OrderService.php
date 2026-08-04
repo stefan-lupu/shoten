@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Dto\CheckoutData;
-use App\Entity\Address;
 use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\OrderItem;
@@ -12,7 +11,6 @@ use App\Enum\OrderStatus;
 use App\Enum\PaymentStatus;
 use App\Enum\StockStatus;
 use App\Exception\InsufficientStockException;
-use App\Repository\AddressRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
@@ -23,7 +21,6 @@ final class OrderService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly CartManager $cartManager,
-        private readonly AddressRepository $addressRepository,
         private readonly MailerInterface $mailer,
         private readonly StoreConfig $store,
         private readonly CampaignEngine $campaignEngine,
@@ -71,14 +68,16 @@ final class OrderService
         }
 
         return $this->entityManager->wrapInTransaction(function () use ($user, $cart, $data, $couponCode, $campaignResult) {
+            // Snapshot al adresei la momentul comenzii — dacă userul o editează
+            // sau o șterge ulterior, istoricul comenzii rămâne neschimbat.
             $order = (new Order())
                 ->setUser($user)
-                ->setShippingFullName($data->fullName)
-                ->setShippingPhone($data->phone)
-                ->setShippingCounty($data->county)
-                ->setShippingCity($data->city)
-                ->setShippingStreet($data->street)
-                ->setShippingPostalCode($data->postalCode)
+                ->setShippingFullName($data->address->getFullName())
+                ->setShippingPhone($data->address->getPhone())
+                ->setShippingCounty($data->address->getCounty())
+                ->setShippingCity($data->address->getCity())
+                ->setShippingStreet($data->address->getStreet())
+                ->setShippingPostalCode($data->address->getPostalCode())
                 ->setStatus(OrderStatus::Pending)
                 ->setPaymentMethod($data->paymentMethod)
                 ->setPaymentStatus(PaymentStatus::Pending)
@@ -126,32 +125,12 @@ final class OrderService
             }
 
             $this->entityManager->persist($order);
-            $this->saveDefaultAddress($user, $data);
             $this->cartManager->clear($cart);
 
             $this->sendConfirmationEmail($order);
 
             return $order;
         });
-    }
-
-    private function saveDefaultAddress(User $user, CheckoutData $data): void
-    {
-        $address = $this->addressRepository->findOneBy(['user' => $user, 'isDefault' => true]) ?? (new Address())
-            ->setUser($user)
-            ->setIsDefault(true)
-        ;
-
-        $address
-            ->setFullName($data->fullName)
-            ->setPhone($data->phone)
-            ->setCounty($data->county)
-            ->setCity($data->city)
-            ->setStreet($data->street)
-            ->setPostalCode($data->postalCode)
-        ;
-
-        $this->entityManager->persist($address);
     }
 
     private function sendConfirmationEmail(Order $order): void
