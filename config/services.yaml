@@ -33,6 +33,8 @@ services:
             $companyCui: '%env(STORE_COMPANY_CUI)%'
             $companyRegCom: '%env(STORE_COMPANY_REG_COM)%'
             $companyAddress: '%env(STORE_COMPANY_ADDRESS)%'
+            $vatPayer: '%env(bool:STORE_VAT_PAYER)%'
+            $vatRate: '%env(STORE_VAT_RATE)%'
             $logoPath: '%env(THEME_LOGO_PATH)%'
             $faviconPath: '%env(THEME_FAVICON_PATH)%'
             $adsenseClientId: '%env(GOOGLE_ADSENSE_CLIENT_ID)%'

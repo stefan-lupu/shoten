@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Comanda ta #{{ order.id }} la <strong>{{ store.name }}</strong> a fost anulată.</p>
+
+        {% if wasRefunded %}
+            <p>
+                Suma de {{ order.total }} lei a fost marcată ca rambursată. În
+                funcție de banca ta, rambursarea poate dura câteva zile
+                lucrătoare până apare în cont.
+            </p>
+        {% endif %}
+
+        <p>Dacă ai întrebări, ne poți scrie la {{ store.email }}.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>

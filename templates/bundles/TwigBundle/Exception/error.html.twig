@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>A apărut o eroare — {{ store.name }}</title>
+        <style>
+            body { font-family: system-ui, sans-serif; background: {{ store.themeColors.bg }}; color: {{ store.themeColors.text }}; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; text-align: center; }
+            .box { max-width: 28rem; padding: 2rem; }
+            h1 { font-size: 3rem; margin: 0 0 .5rem; color: {{ store.themeColors.accentStrong }}; }
+            p { color: {{ store.themeColors.textMuted }}; }
+            a { color: {{ store.themeColors.accent }}; }
+        </style>
+    </head>
+    <body>
+        <div class="box">
+            <h1>Oops</h1>
+            <p>A apărut o eroare neașteptată. Echipa noastră a fost notificată — te rugăm să încerci din nou puțin mai târziu.</p>
+            <p><a href="/">Înapoi la {{ store.name }}</a></p>
+        </div>
+    </body>
+</html>

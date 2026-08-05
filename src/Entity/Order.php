@@ -76,6 +76,24 @@ class Order
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $couponCode = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $refundedAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $refundReason = null;
+
+    /**
+     * Număr AWB/tracking de la curier — completat la marcarea ca expediată.
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $trackingNumber = null;
+
+    /**
+     * Notițe interne, vizibile doar în admin (ex: „client a sunat, vrea X”) — niciodată afișate clientului.
+     */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $adminNotes = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -268,6 +286,48 @@ class Order
     public function setCouponCode(?string $couponCode): static
     {
         $this->couponCode = $couponCode;
+
+        return $this;
+    }
+
+    public function getRefundedAt(): ?\DateTimeImmutable
+    {
+        return $this->refundedAt;
+    }
+
+    public function getRefundReason(): ?string
+    {
+        return $this->refundReason;
+    }
+
+    public function markRefunded(?string $reason): static
+    {
+        $this->refundedAt = new \DateTimeImmutable();
+        $this->refundReason = $reason;
+
+        return $this;
+    }
+
+    public function getTrackingNumber(): ?string
+    {
+        return $this->trackingNumber;
+    }
+
+    public function setTrackingNumber(?string $trackingNumber): static
+    {
+        $this->trackingNumber = $trackingNumber;
+
+        return $this;
+    }
+
+    public function getAdminNotes(): ?string
+    {
+        return $this->adminNotes;
+    }
+
+    public function setAdminNotes(?string $adminNotes): static
+    {
+        $this->adminNotes = $adminNotes;
 
         return $this;
     }

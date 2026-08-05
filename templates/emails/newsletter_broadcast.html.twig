@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        {{ body|nl2br }}
+
+        <p style="margin-top: 32px; font-size: 12px; color: #888;">
+            Primești acest email pentru că ești abonat la newsletter-ul {{ store.name }}.
+            <a href="{{ unsubscribeUrl }}">Dezabonează-te</a>.
+        </p>
+    </body>
+</html>

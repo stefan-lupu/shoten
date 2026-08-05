@@ -1,0 +1,15 @@
+framework:
+    rate_limiter:
+        # Limitează câte cereri de resetare parolă poate trimite aceeași
+        # adresă IP, indiferent de ce emailuri încearcă — completează limita
+        # per-cont din reset_password.yaml (care nu vede IP-ul).
+        reset_password_ip:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '15 minutes'
+        # Limitează câte formulare de contact poate trimite aceeași IP, ca
+        # să nu poată fi folosit pentru spam prin retrimitere repetată.
+        contact_form_ip:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '10 minutes'

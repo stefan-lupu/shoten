@@ -31,6 +31,7 @@
                 {% if store.companyRegCom %}<div>Nr. Reg. Com.: {{ store.companyRegCom }}</div>{% endif %}
                 {% if store.companyAddress %}<div>{{ store.companyAddress }}</div>{% endif %}
                 {% if store.email %}<div>{{ store.email }}</div>{% endif %}
+                <div>{{ store.vatPayer ? 'Plătitor de TVA' : 'Neplătitor de TVA' }}</div>
             </td>
             <td class="right">
                 <h1>Factură / Chitanță</h1>
@@ -74,8 +75,18 @@
             <td class="label">Transport:</td>
             <td class="value">{{ order.shippingCost == '0.00' ? 'Gratuit' : (order.shippingCost ~ ' lei') }}</td>
         </tr>
+        {% if vatAmount is not null %}
+            <tr>
+                <td class="label">Valoare fără TVA:</td>
+                <td class="value">{{ netAmount }} lei</td>
+            </tr>
+            <tr>
+                <td class="label">din care TVA ({{ store.vatRate }}%):</td>
+                <td class="value">{{ vatAmount }} lei</td>
+            </tr>
+        {% endif %}
         <tr class="grand">
-            <td class="label">Total:</td>
+            <td class="label">Total{{ vatAmount is not null ? ' (TVA inclus)' : '' }}:</td>
             <td class="value">{{ order.total }} lei</td>
         </tr>
     </table>

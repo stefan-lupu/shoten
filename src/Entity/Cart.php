@@ -29,6 +29,15 @@ class Cart
     private ?\DateTimeImmutable $updatedAt = null;
 
     /**
+     * Setat când s-a trimis reminderul de coș abandonat, ca să nu se
+     * retrimită la fiecare rulare a comenzii — resetat la null la orice
+     * modificare a coșului (vezi touch()), ca un client care revine și mai
+     * adaugă ceva să poată primi un nou reminder mai târziu.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $reminderSentAt = null;
+
+    /**
      * @var Collection<int, CartItem>
      */
     #[ORM\OneToMany(targetEntity: CartItem::class, mappedBy: 'cart', orphanRemoval: true, cascade: ['persist'])]
@@ -83,6 +92,17 @@ class Cart
     public function touch(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
+        $this->reminderSentAt = null;
+    }
+
+    public function getReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->reminderSentAt;
+    }
+
+    public function markReminderSent(): void
+    {
+        $this->reminderSentAt = new \DateTimeImmutable();
     }
 
     /**

@@ -4,9 +4,79 @@
 
 {% block body %}
     <h1>Politica de confidențialitate</h1>
-    <p class="text-body-secondary">
-        Această pagină este un placeholder. {{ store.name }} va publica aici
-        politica completă de confidențialitate, inclusiv modul în care sunt
-        folosite datele colectate prin formularul de newsletter.
+    <div class="alert alert-warning">
+        Acest text e un model de pornire, nu conținut juridic final — trebuie
+        revizuit de un avocat înainte de lansarea magazinului în producție.
+    </div>
+
+    <h2 class="h5 mt-4">1. Cine prelucrează datele</h2>
+    <p>
+        {{ store.companyName }}, CUI {{ store.companyCui }}, cu sediul în
+        {{ store.companyAddress }} (denumit „Operatorul"), prelucrează datele
+        cu caracter personal ale utilizatorilor magazinului {{ store.name }}
+        ({{ store.domain }}), conform Regulamentului (UE) 2016/679 (GDPR).
+    </p>
+
+    <h2 class="h5 mt-4">2. Ce date colectăm</h2>
+    <ul>
+        <li><strong>Cont client:</strong> nume, prenume, email, telefon (opțional).</li>
+        <li><strong>Adrese de livrare:</strong> nume destinatar, telefon, județ, localitate, stradă, cod poștal.</li>
+        <li><strong>Comenzi:</strong> produsele comandate, adresa de livrare de la momentul comenzii, metoda și statusul plății.</li>
+        <li><strong>Newsletter:</strong> adresa de email, cu consimțământ explicit la abonare.</li>
+        <li><strong>Notificări „revino în stoc”:</strong> adresa de email pentru produsul solicitat.</li>
+        <li><strong>Recenzii:</strong> nota și comentariul lăsat, asociate contului tău.</li>
+        <li><strong>Cookie-uri:</strong> doar cu acordul tău explicit (vezi banner-ul de consimțământ) — Google Analytics, Google Ads, AdSense.</li>
+    </ul>
+
+    <h2 class="h5 mt-4">3. Scopul prelucrării</h2>
+    <p>
+        Datele sunt folosite exclusiv pentru: procesarea și livrarea comenzilor,
+        comunicarea legată de comandă (confirmări, facturi), suport clienți,
+        trimiterea newsletter-ului (doar dacă te-ai abonat), notificări de
+        stoc solicitate explicit, și — cu acordul tău — analiză de trafic și
+        publicitate.
+    </p>
+
+    <h2 class="h5 mt-4">4. Cât timp păstrăm datele</h2>
+    <p>
+        Datele contului se păstrează cât timp ai cont activ. Comenzile se
+        păstrează conform obligațiilor legale de evidență contabilă/fiscală
+        (de regulă 10 ani în România), chiar dacă îți ștergi contul — vezi
+        secțiunea „Ștergere cont” de mai jos. Abonarea la newsletter se
+        păstrează până la dezabonare.
+    </p>
+
+    <h2 class="h5 mt-4">5. Drepturile tale</h2>
+    <p>Conform GDPR, ai dreptul de a:</p>
+    <ul>
+        <li>accesa datele pe care le deținem despre tine;</li>
+        <li>solicita corectarea datelor incorecte (din secțiunea „Adresele mele”/„Contul meu”);</li>
+        <li>descărca o copie a datelor tale (din „Contul meu” → „Descarcă datele mele”);</li>
+        <li>solicita ștergerea contului („Contul meu” → „Șterge contul”) — comenzile deja plasate rămân, anonimizate, din motive legale de evidență contabilă;</li>
+        <li>retrage oricând consimțământul pentru newsletter sau cookie-uri de analiză/publicitate;</li>
+        <li>depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP, dataprotection.ro).</li>
+    </ul>
+
+    <h2 class="h5 mt-4">6. Cu cine partajăm datele</h2>
+    <p>
+        Datele de livrare sunt partajate cu curierul care livrează comanda.
+        Datele de plată cu cardul sunt procesate de providerul de plăți
+        (Netopia), nu sunt stocate de {{ store.name }}. Nu vindem datele
+        tale către terți.
+    </p>
+
+    <h2 class="h5 mt-4">7. Cookie-uri</h2>
+    <p>
+        Folosim cookie-uri strict necesare (coș, sesiune, autentificare) și,
+        doar cu acordul tău explicit dat prin banner-ul afișat la prima
+        vizită, cookie-uri de analiză (Google Analytics) și publicitate
+        (Google Ads, AdSense). Poți schimba oricând alegerea folosind
+        butonul de retrimitere/refuz din banner.
+    </p>
+
+    <h2 class="h5 mt-4">8. Contact</h2>
+    <p>
+        Pentru orice întrebare legată de datele tale personale, ne poți
+        contacta la {{ store.email }}.
     </p>
 {% endblock %}

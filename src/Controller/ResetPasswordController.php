@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
@@ -37,12 +38,21 @@ class ResetPasswordController extends AbstractController
      * Display & process form to request a password reset.
      */
     #[Route('', name: 'app_forgot_password_request')]
-    public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator): Response
+    public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator, RateLimiterFactoryInterface $resetPasswordIpLimiter): Response
     {
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Protecție per-IP, separată de limita per-cont din
+            // reset_password.yaml — vezi config/packages/rate_limiter.yaml.
+            $limiter = $resetPasswordIpLimiter->create($request->getClientIp());
+            if (!$limiter->consume(1)->isAccepted()) {
+                $this->addFlash('reset_password_error', 'Ai trimis prea multe cereri de resetare a parolei. Te rugăm să încerci din nou mai târziu.');
+
+                return $this->redirectToRoute('app_forgot_password_request');
+            }
+
             /** @var string $email */
             $email = $form->get('email')->getData();
 

@@ -1,0 +1,22 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Compune newsletter{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted">
+                Mesajul va fi trimis către toți cei {{ subscriberCount }} abonați activi la newsletter.
+            </p>
+
+            {{ form_start(broadcastForm) }}
+                {{ form_row(broadcastForm.subject) }}
+                {{ form_row(broadcastForm.body) }}
+
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Sigur vrei să trimiți acest email către toți cei {{ subscriberCount }} abonați? Nu poate fi anulat după trimitere.')">
+                    Trimite către {{ subscriberCount }} abonați
+                </button>
+            {{ form_end(broadcastForm) }}
+        </div>
+    </div>
+{% endblock %}

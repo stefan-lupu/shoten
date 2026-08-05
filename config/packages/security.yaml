@@ -24,6 +24,11 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+            # Protecție brute-force: după 5 încercări eșuate (pe combinația
+            # email+IP), contul e blocat temporar 5 minute.
+            login_throttling:
+                max_attempts: 5
+                interval: '5 minutes'
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -49,7 +54,9 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN_PANEL }
-        - { path: ^/cont, roles: ROLE_USER }
+        # Ancorat cu ($|/) — altfel „^/cont" prinde și „/contact" (pagina de
+        # contact, publică), nu doar „/cont" și „/cont/...".
+        - { path: ^/cont($|/), roles: ROLE_USER }
 
 when@test:
     security:

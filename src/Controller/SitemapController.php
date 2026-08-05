@@ -51,11 +51,13 @@ final class SitemapController extends AbstractController
                 'changefreq' => 'daily',
                 'priority' => '1.0',
             ];
-            $urls[] = [
-                'loc' => $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                'changefreq' => 'yearly',
-                'priority' => '0.3',
-            ];
+            foreach (['app_privacy_policy', 'app_terms', 'app_return_policy', 'app_contact'] as $staticRoute) {
+                $urls[] = [
+                    'loc' => $this->generateUrl($staticRoute, [], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'changefreq' => 'yearly',
+                    'priority' => '0.3',
+                ];
+            }
 
             foreach ($categoryRepository->findAll() as $category) {
                 $urls[] = [

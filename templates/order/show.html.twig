@@ -23,6 +23,12 @@
     <p>Status: {% include 'order/_status_badge.html.twig' with { status: order.status } %}</p>
     <p>Plată: {{ order.paymentMethod.value }} ({{ order.paymentStatus.value }})</p>
     <p>Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
+    {% if order.trackingNumber %}
+        <p>Număr AWB: <strong>{{ order.trackingNumber }}</strong></p>
+    {% endif %}
+    {% if order.refundedAt %}
+        <p class="text-warning">Rambursată la {{ order.refundedAt|date('d.m.Y H:i') }}.</p>
+    {% endif %}
 
     <div class="table-responsive">
         <table class="table align-middle">

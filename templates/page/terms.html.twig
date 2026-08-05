@@ -26,9 +26,10 @@
 
     <h2 class="h5 mt-4">3. Produse și prețuri</h2>
     <p>
-        Prețurile afișate sunt exprimate în lei (RON) și includ TVA, unde
-        este cazul. Vânzătorul își rezervă dreptul de a modifica prețurile
-        fără notificare prealabilă, modificările neafectând comenzile deja
+        Prețurile afișate sunt exprimate în lei (RON)
+        {% if store.vatPayer %}și includ TVA ({{ store.vatRate }}%){% else %}— Vânzătorul nu este plătitor de TVA{% endif %}.
+        Vânzătorul își rezervă dreptul de a modifica prețurile fără
+        notificare prealabilă, modificările neafectând comenzile deja
         confirmate.
     </p>
 

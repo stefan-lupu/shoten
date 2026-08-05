@@ -22,6 +22,8 @@ final readonly class StoreConfig
         public string $companyCui,
         public string $companyRegCom,
         public string $companyAddress,
+        public bool $vatPayer,
+        public string $vatRate,
         public ThemeColors $themeColors,
         public string $logoPath,
         public string $faviconPath,

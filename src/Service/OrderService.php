@@ -155,6 +155,53 @@ final class OrderService
         });
     }
 
+    /**
+     * Anulare/rambursare din admin — spre deosebire de cancelOrder() (client,
+     * doar Pending), aici e permisă orice comandă neterminată, iar dacă era
+     * deja plătită, se marchează explicit rambursată (evidență, nu declanșează
+     * o rambursare reală la provider — Netopia e simulat, vezi tasks/done/07-plati.md).
+     *
+     * @throws \DomainException dacă statusul nu (mai) permite anularea
+     */
+    public function adminCancelOrder(Order $order, ?string $reason): void
+    {
+        if (\in_array($order->getStatus(), [OrderStatus::Cancelled, OrderStatus::Delivered], true)) {
+            throw new \DomainException('Această comandă nu mai poate fi anulată.');
+        }
+
+        $wasPaid = PaymentStatus::Paid === $order->getPaymentStatus();
+
+        $this->entityManager->wrapInTransaction(function () use ($order, $reason, $wasPaid) {
+            foreach ($order->getItems() as $item) {
+                $product = $item->getProduct();
+                if ($product && $product->getStockStatus() === StockStatus::InStock) {
+                    $product->setStock($product->getStock() + $item->getQuantity());
+                }
+            }
+
+            $order->setStatus(OrderStatus::Cancelled);
+            if ($wasPaid) {
+                $order->setPaymentStatus(PaymentStatus::Refunded);
+                $order->markRefunded($reason);
+            }
+        });
+
+        $this->sendCancellationEmail($order, $wasPaid);
+    }
+
+    private function sendCancellationEmail(Order $order, bool $wasRefunded): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new EmailAddress($this->store->email, $this->store->name))
+            ->to($order->getUser()->getEmail())
+            ->subject(sprintf('Comanda #%d a fost anulată', $order->getId()))
+            ->htmlTemplate('emails/order_cancelled.html.twig')
+            ->context(['order' => $order, 'wasRefunded' => $wasRefunded])
+        ;
+
+        $this->mailer->send($email);
+    }
+
     private function sendConfirmationEmail(Order $order): void
     {
         $email = (new TemplatedEmail())

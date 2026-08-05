@@ -2,8 +2,12 @@
 
 namespace App\Controller\Admin;
 
+use App\Dto\NewsletterBroadcast;
 use App\Entity\NewsletterSubscriber;
+use App\Form\NewsletterBroadcastType;
 use App\Repository\NewsletterSubscriberRepository;
+use App\Service\StoreConfig;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -12,8 +16,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -48,9 +58,15 @@ class NewsletterSubscriberCrudController extends AbstractCrudController
             ->createAsGlobalAction()
         ;
 
+        $compose = Action::new('compose', 'Compune newsletter', 'fa fa-paper-plane')
+            ->linkToRoute('admin_newsletter_subscriber_compose')
+            ->createAsGlobalAction()
+        ;
+
         return $actions
             ->disable(Action::NEW, Action::EDIT)
             ->add(Crud::PAGE_INDEX, $exportCsv)
+            ->add(Crud::PAGE_INDEX, $compose)
         ;
     }
 
@@ -76,5 +92,46 @@ class NewsletterSubscriberCrudController extends AbstractCrudController
         $response->headers->set('Content-Disposition', 'attachment; filename="newsletter-abonati.csv"');
 
         return $response;
+    }
+
+    #[AdminRoute(path: '/newsletter/compune', name: 'compose')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function compose(
+        Request $request,
+        NewsletterSubscriberRepository $repository,
+        MailerInterface $mailer,
+        StoreConfig $store,
+        UrlGeneratorInterface $urlGenerator,
+    ): Response {
+        $broadcast = new NewsletterBroadcast();
+        $form = $this->createForm(NewsletterBroadcastType::class, $broadcast);
+        $form->handleRequest($request);
+
+        $subscribers = $repository->findBy(['consentGiven' => true]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($subscribers as $subscriber) {
+                $email = (new TemplatedEmail())
+                    ->from(new Address($store->email, $store->name))
+                    ->to($subscriber->getEmail())
+                    ->subject($broadcast->subject)
+                    ->htmlTemplate('emails/newsletter_broadcast.html.twig')
+                    ->context([
+                        'body' => $broadcast->body,
+                        'unsubscribeUrl' => $urlGenerator->generate('app_newsletter_unsubscribe', ['token' => $subscriber->getUnsubscribeToken()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ])
+                ;
+                $mailer->send($email);
+            }
+
+            $this->addFlash('success', sprintf('Newsletter trimis către %d abonați.', count($subscribers)));
+
+            return $this->redirectToRoute('admin_newsletter_subscriber_compose');
+        }
+
+        return $this->render('admin/newsletter_compose.html.twig', [
+            'broadcastForm' => $form,
+            'subscriberCount' => count($subscribers),
+        ]);
     }
 }

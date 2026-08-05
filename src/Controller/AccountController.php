@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Cart;
 use App\Entity\User;
 use App\Repository\AddressRepository;
+use App\Repository\OrderRepository;
 use App\Service\StoreConfig;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +26,66 @@ final class AccountController extends AbstractController
     public function index(): Response
     {
         return $this->render('account/index.html.twig');
+    }
+
+    /**
+     * Export date personale (drept GDPR la portabilitatea datelor) — un
+     * JSON descărcabil cu tot ce ținem despre client: profil, adrese,
+     * istoricul comenzilor (inclusiv adresa de livrare salvată la momentul
+     * fiecărei comenzi, care poate diferi de adresele curente).
+     */
+    #[Route('/cont/date/descarca', name: 'app_account_export', methods: ['GET'])]
+    public function exportData(AddressRepository $addressRepository, OrderRepository $orderRepository): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $data = [
+            'cont' => [
+                'email' => $user->getEmail(),
+                'prenume' => $user->getFirstName(),
+                'nume' => $user->getLastName(),
+                'telefon' => $user->getPhone(),
+                'cont_creat_la' => $user->getCreatedAt()?->format('c'),
+            ],
+            'adrese' => array_map(static fn ($address) => [
+                'nume_complet' => $address->getFullName(),
+                'telefon' => $address->getPhone(),
+                'judet' => $address->getCounty(),
+                'localitate' => $address->getCity(),
+                'strada' => $address->getStreet(),
+                'cod_postal' => $address->getPostalCode(),
+                'principala' => $address->isDefault(),
+            ], $addressRepository->findByUser($user)),
+            'comenzi' => array_map(static fn ($order) => [
+                'id' => $order->getId(),
+                'data' => $order->getCreatedAt()?->format('c'),
+                'status' => $order->getStatus()->value,
+                'metoda_plata' => $order->getPaymentMethod()?->value,
+                'status_plata' => $order->getPaymentStatus()->value,
+                'total' => $order->getTotal(),
+                'cost_transport' => $order->getShippingCost(),
+                'adresa_livrare' => [
+                    'nume_complet' => $order->getShippingFullName(),
+                    'telefon' => $order->getShippingPhone(),
+                    'judet' => $order->getShippingCounty(),
+                    'localitate' => $order->getShippingCity(),
+                    'strada' => $order->getShippingStreet(),
+                    'cod_postal' => $order->getShippingPostalCode(),
+                ],
+                'produse' => array_map(static fn ($item) => [
+                    'produs' => $item->getProductName(),
+                    'cantitate' => $item->getQuantity(),
+                    'pret_unitar' => $item->getUnitPrice(),
+                ], $order->getItems()->toArray()),
+            ], $orderRepository->findByUser($user)),
+        ];
+
+        $response = new JsonResponse($data, 200, [], false);
+        $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $response->headers->set('Content-Disposition', 'attachment; filename="datele-mele.json"');
+
+        return $response;
     }
 
     /**

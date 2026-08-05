@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ user.firstName }},</p>
+
+        <p>Ai lăsat câteva produse în coșul tău la <strong>{{ store.name }}</strong>:</p>
+
+        <ul>
+            {% for item in cart.items %}
+                <li>{{ item.quantity }} x {{ item.product.name }} — {{ item.subtotal }} lei</li>
+            {% endfor %}
+        </ul>
+
+        <p>
+            <a href="{{ cartUrl }}">Finalizează comanda</a>
+        </p>
+
+        <p>Dacă între timp ai renunțat, poți ignora acest mesaj.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>

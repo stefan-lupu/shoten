@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <div class="mx-auto" style="max-width: 32rem">
+        <h1 class="mb-3">Contact</h1>
+        <p class="text-body-secondary">
+            Ai o întrebare despre o comandă sau despre produsele noastre?
+            Scrie-ne mai jos sau la
+            <a href="mailto:{{ store.email }}">{{ store.email }}</a>{% if store.phone %} / {{ store.phone }}{% endif %}.
+        </p>
+
+        {{ form_start(contactForm) }}
+            {{ form_row(contactForm.name) }}
+            {{ form_row(contactForm.email) }}
+            {{ form_row(contactForm.subject) }}
+            {{ form_row(contactForm.message) }}
+
+            <button class="btn btn-primary">Trimite mesajul</button>
+        {{ form_end(contactForm) }}
+    </div>
+{% endblock %}

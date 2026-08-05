@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Mesaj nou de contact de la <strong>{{ contact.name }}</strong> ({{ contact.email }}):</p>
+
+        <p><strong>Subiect:</strong> {{ contact.subject }}</p>
+
+        <p>{{ contact.message|nl2br }}</p>
+    </body>
+</html>
