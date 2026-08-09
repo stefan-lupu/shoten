@@ -74,6 +74,27 @@
                 {% endif %}
             </p>
             <p class="fs-4 fw-bold mt-3">{{ product.price }} lei</p>
+
+            {% if is_granted('ROLE_WHOLESALE') and product.wholesaleTiers is not empty %}
+                <table class="table table-sm w-auto">
+                    <caption class="caption-top px-0">Preț pe cantitate</caption>
+                    <thead>
+                        <tr>
+                            <th>Cantitate</th>
+                            <th>Preț/buc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tier in product.wholesaleTiers %}
+                            <tr>
+                                <td>{{ tier.minQuantity }}+ buc</td>
+                                <td>{{ tier.unitPrice }} lei</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
             <p class="text-body-secondary">Origine: {{ product.origin }}</p>
             <p>{{ product.description }}</p>
 

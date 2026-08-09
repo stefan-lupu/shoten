@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Enum\StockStatus;
 use App\Form\ProductImageType;
+use App\Form\ProductWholesaleTierType;
 use App\Service\StockNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -83,6 +84,13 @@ class ProductCrudController extends AbstractCrudController
             ->allowAdd($canEditAll)
             ->allowDelete($canEditAll)
             ->hideOnIndex()
+        ;
+        yield CollectionField::new('wholesaleTiers', 'Preț pe cantitate (angro)')
+            ->setEntryType(ProductWholesaleTierType::class)
+            ->allowAdd($canEditAll)
+            ->allowDelete($canEditAll)
+            ->hideOnIndex()
+            ->setHelp('Praguri de cantitate → preț/buc, vizibile doar clienților cu cont angro aprobat. Adaugă-le în ordine crescătoare a cantității, cu prețul scăzând (sau rămânând constant) la fiecare prag.')
         ;
         yield DateTimeField::new('createdAt')->hideOnForm();
     }

@@ -77,10 +77,22 @@ class Product
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $images;
 
+    /**
+     * Praguri de preț pe cantitate pentru conturi angro — vezi
+     * App\Service\WholesalePricingResolver. Fără efect pentru clienții
+     * fără ROLE_WHOLESALE.
+     *
+     * @var Collection<int, ProductWholesaleTier>
+     */
+    #[ORM\OneToMany(targetEntity: ProductWholesaleTier::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OrderBy(['minQuantity' => 'ASC'])]
+    private Collection $wholesaleTiers;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->images = new ArrayCollection();
+        $this->wholesaleTiers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -260,6 +272,35 @@ class Product
         if ($this->images->removeElement($image)) {
             if ($image->getProduct() === $this) {
                 $image->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProductWholesaleTier>
+     */
+    public function getWholesaleTiers(): Collection
+    {
+        return $this->wholesaleTiers;
+    }
+
+    public function addWholesaleTier(ProductWholesaleTier $tier): static
+    {
+        if (!$this->wholesaleTiers->contains($tier)) {
+            $this->wholesaleTiers->add($tier);
+            $tier->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWholesaleTier(ProductWholesaleTier $tier): static
+    {
+        if ($this->wholesaleTiers->removeElement($tier)) {
+            if ($tier->getProduct() === $this) {
+                $tier->setProduct(null);
             }
         }
 

@@ -22,6 +22,7 @@ final class CartManager
         private readonly CartRepository $cartRepository,
         private readonly RequestStack $requestStack,
         private readonly Security $security,
+        private readonly WholesalePricingResolver $wholesalePricingResolver,
     ) {
     }
 
@@ -64,14 +65,22 @@ final class CartManager
         $newQuantity = $quantity + ($item?->getQuantity() ?? 0);
         $this->assertStockAvailable($product, $newQuantity);
 
+        // Prețul angro (dacă userul are ROLE_WHOLESALE și cantitatea atinge
+        // un prag) înlocuiește prețul de retail ca bază a snapshot-ului —
+        // CampaignEngine calculează subtotalul din `unitPrice`-ul salvat aici,
+        // deci cupoanele/reducerile normale se aplică automat PESTE acest preț
+        // de bază, nu invers (vezi tasks/16-preturi-angro.md).
+        $unitPrice = $this->wholesalePricingResolver->resolveUnitPrice($product, $newQuantity, $this->currentUser());
+
         if ($item) {
             $item->setQuantity($newQuantity);
+            $item->setUnitPrice($unitPrice);
         } else {
             $item = (new CartItem())
                 ->setCart($cart)
                 ->setProduct($product)
                 ->setQuantity($quantity)
-                ->setUnitPrice($product->getPrice())
+                ->setUnitPrice($unitPrice)
             ;
             $this->entityManager->persist($item);
         }
@@ -93,6 +102,10 @@ final class CartManager
 
         $this->assertStockAvailable($item->getProduct(), $quantity);
         $item->setQuantity($quantity);
+        // Recalculat la fiecare schimbare de cantitate, nu doar la adăugare —
+        // un client angro care urcă peste un prag nou trebuie să vadă prețul
+        // scăzând automat în coș (vezi tasks/16-preturi-angro.md).
+        $item->setUnitPrice($this->wholesalePricingResolver->resolveUnitPrice($item->getProduct(), $quantity, $this->currentUser()));
         $item->getCart()->touch();
         $this->entityManager->flush();
     }
@@ -158,6 +171,12 @@ final class CartManager
 
         $userCart = $this->cartRepository->findOneBy(['user' => $user]);
         if (!$userCart) {
+            // Coșul anonim a fost umplut înainte de login (deci fără preț
+            // angro, chiar dacă userul e aprobat) — recalculăm acum că știm
+            // cine s-a logat.
+            foreach ($sessionCart->getItems() as $sessionItem) {
+                $sessionItem->setUnitPrice($this->wholesalePricingResolver->resolveUnitPrice($sessionItem->getProduct(), $sessionItem->getQuantity(), $user));
+            }
             $sessionCart->setUser($user);
             $sessionCart->setSessionId(null);
             $this->entityManager->flush();
@@ -172,9 +191,12 @@ final class CartManager
 
             $existing = $this->findItem($userCart, $sessionItem->getProduct());
             if ($existing) {
-                $existing->setQuantity($existing->getQuantity() + $sessionItem->getQuantity());
+                $mergedQuantity = $existing->getQuantity() + $sessionItem->getQuantity();
+                $existing->setQuantity($mergedQuantity);
+                $existing->setUnitPrice($this->wholesalePricingResolver->resolveUnitPrice($existing->getProduct(), $mergedQuantity, $user));
                 $this->entityManager->remove($sessionItem);
             } else {
+                $sessionItem->setUnitPrice($this->wholesalePricingResolver->resolveUnitPrice($sessionItem->getProduct(), $sessionItem->getQuantity(), $user));
                 $sessionItem->setCart($userCart);
                 $userCart->getItems()->add($sessionItem);
             }
@@ -195,6 +217,13 @@ final class CartManager
         }
 
         return $sessionId;
+    }
+
+    private function currentUser(): ?User
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof User ? $user : null;
     }
 
     private function findItem(Cart $cart, Product $product): ?CartItem
