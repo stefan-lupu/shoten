@@ -46,7 +46,12 @@ security:
         # acces (vezi access_control mai jos și #[IsGranted] din controllerele
         # de admin), astfel încât un rol specializat (comenzi/financiar/
         # gestionar) să nu aibă nevoie și de ROLE_ADMIN ca să intre în /admin.
-        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN_PANEL, ROLE_ORDERS_MANAGER, ROLE_FINANCE_MANAGER, ROLE_STOCK_MANAGER, ROLE_CATALOG_VIEWER]
+        # ROLE_WHOLESALE nu apare aici ca țintă a nimănui — e un rol paralel
+        # cu ROLE_USER (acces la prețuri angro), nu unul ierarhic, atribuit
+        # doar prin aprobare manuală (vezi tasks/15-conturi-angro.md). Apare
+        # doar ca beneficiu al ROLE_ADMIN, ca un admin să poată vedea/testa
+        # magazinul exact cum îl vede un cont angro aprobat.
+        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN_PANEL, ROLE_ORDERS_MANAGER, ROLE_FINANCE_MANAGER, ROLE_STOCK_MANAGER, ROLE_CATALOG_VIEWER, ROLE_WHOLESALE]
         ROLE_ORDERS_MANAGER: [ROLE_ADMIN_PANEL, ROLE_ORDERS_VIEWER]
         ROLE_FINANCE_MANAGER: [ROLE_ADMIN_PANEL, ROLE_ORDERS_VIEWER]
         ROLE_STOCK_MANAGER: [ROLE_ADMIN_PANEL, ROLE_CATALOG_VIEWER]

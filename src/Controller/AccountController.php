@@ -4,16 +4,21 @@ namespace App\Controller;
 
 use App\Entity\Cart;
 use App\Entity\User;
+use App\Enum\WholesaleStatus;
+use App\Form\WholesaleApplicationType;
 use App\Repository\AddressRepository;
 use App\Repository\OrderRepository;
 use App\Service\StoreConfig;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address as EmailAddress;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -26,6 +31,49 @@ final class AccountController extends AbstractController
     public function index(): Response
     {
         return $this->render('account/index.html.twig');
+    }
+
+    /**
+     * Cerere de cont angro — vezi tasks/15-conturi-angro.md. Aprobarea e
+     * mereu manuală din admin; aici clientul doar trimite datele firmei
+     * și vede statusul cererii lui curente.
+     */
+    #[Route('/cont/angro', name: 'app_account_wholesale')]
+    public function wholesale(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer, StoreConfig $store): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (\in_array($user->getWholesaleStatus(), [WholesaleStatus::Pending, WholesaleStatus::Approved], true)) {
+            return $this->render('account/wholesale.html.twig', ['user' => $user]);
+        }
+
+        $form = $this->createForm(WholesaleApplicationType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setWholesaleStatus(WholesaleStatus::Pending);
+            $user->setWholesaleRequestedAt(new \DateTimeImmutable());
+            $entityManager->flush();
+
+            $email = (new TemplatedEmail())
+                ->from(new EmailAddress($store->email, $store->name))
+                ->to($user->getEmail())
+                ->subject('Cererea ta de cont angro a fost primită')
+                ->htmlTemplate('emails/wholesale_request_received.html.twig')
+                ->context(['user' => $user])
+            ;
+            $mailer->send($email);
+
+            $this->addFlash('success', 'Cererea ta de cont angro a fost trimisă. Te anunțăm pe email când e procesată.');
+
+            return $this->redirectToRoute('app_account_wholesale');
+        }
+
+        return $this->render('account/wholesale.html.twig', [
+            'user' => $user,
+            'wholesaleForm' => $form,
+        ]);
     }
 
     /**

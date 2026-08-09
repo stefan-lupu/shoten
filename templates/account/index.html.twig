@@ -8,6 +8,13 @@
     <div class="d-flex gap-2">
         <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
         <a href="{{ path('app_address_index') }}" class="btn btn-outline-primary">Adresele mele</a>
+        {% if app.user.wholesaleStatus.value == 'approved' %}
+            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-success">Cont angro activ</a>
+        {% elseif app.user.wholesaleStatus.value == 'pending' %}
+            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-secondary">Cerere angro în așteptare</a>
+        {% else %}
+            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-primary">Solicită cont angro</a>
+        {% endif %}
     </div>
 
     <hr class="my-4">

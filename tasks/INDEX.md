@@ -25,6 +25,9 @@ Nu sări peste un task doar pentru că pare mic; ordinea contează pentru migră
 | 12 | `12-seo-tehnic.md` | Sitemap, schema.org, meta tags dinamice | 3 |
 | 13 | `13-google-ads-adsense.md` | Google Ads tracking + AdSense (venit pasiv) | 1, 12 |
 | 14 | `14-pregatire-clonare.md` | Verificare finală: zero hardcodări, checklist clonare | toate |
+| 15 | `15-conturi-angro.md` | Modul angro (B2B) — conturi de firmă cu aprobare manuală | 4, 11 |
+| 16 | `16-preturi-angro.md` | Preț pe cantitate (tiers) pentru conturi angro | 15, 2, 8 |
+| 17 | `17-checkout-facturare-angro.md` | Checkout și facturare cu date de firmă pentru comenzi angro | 16, 6, 11 |
 
 ## Reguli globale (valabile pentru toate task-urile)
 
@@ -46,3 +49,6 @@ Nu sări peste un task doar pentru că pare mic; ordinea contează pentru migră
 - Plăți: card, ramburs, transfer bancar.
 - Design: tematic tradițional japonez, negru + auriu.
 - Monetizare adițională: Google AdSense + Google Ads pentru trafic.
+- Modul angro (task 15-17): conturi de firmă cu aprobare manuală, preț pe
+  cantitate vizibil doar clienților aprobați. Fără e-Factura ANAF (scop
+  separat, nediscutat încă).

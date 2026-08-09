@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cont angro — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1 class="mb-3">Cont angro</h1>
+
+    {% if user.wholesaleStatus.value == 'approved' %}
+        <div class="alert alert-success">
+            Contul tău angro este activ. Prețurile pe cantitate apar acum
+            direct pe paginile de produs.
+        </div>
+    {% elseif user.wholesaleStatus.value == 'pending' %}
+        <div class="alert alert-info">
+            Cererea ta de cont angro (trimisă la {{ user.wholesaleRequestedAt|date('d.m.Y') }})
+            este în așteptare. Te anunțăm pe email de îndată ce e procesată.
+        </div>
+    {% else %}
+        {% if user.wholesaleStatus.value == 'rejected' %}
+            <div class="alert alert-warning">
+                Cererea anterioară de cont angro a fost respinsă. Poți
+                retrimite o cerere nouă mai jos.
+            </div>
+        {% else %}
+            <p class="text-body-secondary">
+                Ai o firmă și cumperi în cantități mari? Solicită un cont
+                angro — după aprobare vei vedea prețuri pe cantitate direct
+                pe paginile de produs.
+            </p>
+        {% endif %}
+
+        {{ form_start(wholesaleForm) }}
+            {{ form_row(wholesaleForm.companyName) }}
+            {{ form_row(wholesaleForm.companyCui) }}
+            {{ form_row(wholesaleForm.companyRegCom) }}
+            {{ form_row(wholesaleForm.companyAddress) }}
+
+            <button class="btn btn-primary">Trimite cererea</button>
+        {{ form_end(wholesaleForm) }}
+    {% endif %}
+{% endblock %}

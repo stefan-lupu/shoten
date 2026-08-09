@@ -1,0 +1,26 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Respinge cont angro{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted">
+                Respingi cererea de cont angro pentru
+                <strong>{{ wholesaleUser.companyName }}</strong>
+                ({{ wholesaleUser.email }}). Motivul e trimis clientului pe email.
+            </p>
+
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('reject_wholesale_' ~ wholesaleUser.id) }}">
+                <div class="mb-3">
+                    <label class="form-label" for="reason">Motiv (opțional, vizibil clientului)</label>
+                    <textarea class="form-control" id="reason" name="reason" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Sigur respingi această cerere de cont angro?')">
+                    Respinge cererea
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

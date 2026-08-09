@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\WholesaleStatus;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -47,6 +48,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $isVerified = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $companyName = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $companyCui = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $companyRegCom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $companyAddress = null;
+
+    /**
+     * Aprobarea unui cont angro e mereu manuală (vezi tasks/15-conturi-angro.md)
+     * — statusul e separat de rolul ROLE_WHOLESALE efectiv (adăugat/scos din
+     * `roles` doar la aprobare/respingere), ca istoricul cererii să rămână
+     * vizibil chiar dacă rolul e retras ulterior.
+     */
+    #[ORM\Column(enumType: WholesaleStatus::class, options: ['default' => 'none'])]
+    private WholesaleStatus $wholesaleStatus = WholesaleStatus::None;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $wholesaleRequestedAt = null;
 
     /**
      * Nemapat în Doctrine — folosit doar ca punte între formularul din
@@ -190,6 +215,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getCompanyName(): ?string
+    {
+        return $this->companyName;
+    }
+
+    public function setCompanyName(?string $companyName): static
+    {
+        $this->companyName = $companyName;
+
+        return $this;
+    }
+
+    public function getCompanyCui(): ?string
+    {
+        return $this->companyCui;
+    }
+
+    public function setCompanyCui(?string $companyCui): static
+    {
+        $this->companyCui = $companyCui;
+
+        return $this;
+    }
+
+    public function getCompanyRegCom(): ?string
+    {
+        return $this->companyRegCom;
+    }
+
+    public function setCompanyRegCom(?string $companyRegCom): static
+    {
+        $this->companyRegCom = $companyRegCom;
+
+        return $this;
+    }
+
+    public function getCompanyAddress(): ?string
+    {
+        return $this->companyAddress;
+    }
+
+    public function setCompanyAddress(?string $companyAddress): static
+    {
+        $this->companyAddress = $companyAddress;
+
+        return $this;
+    }
+
+    public function getWholesaleStatus(): WholesaleStatus
+    {
+        return $this->wholesaleStatus;
+    }
+
+    public function setWholesaleStatus(WholesaleStatus $wholesaleStatus): static
+    {
+        $this->wholesaleStatus = $wholesaleStatus;
+
+        return $this;
+    }
+
+    public function getWholesaleRequestedAt(): ?\DateTimeImmutable
+    {
+        return $this->wholesaleRequestedAt;
+    }
+
+    public function setWholesaleRequestedAt(?\DateTimeImmutable $wholesaleRequestedAt): static
+    {
+        $this->wholesaleRequestedAt = $wholesaleRequestedAt;
 
         return $this;
     }

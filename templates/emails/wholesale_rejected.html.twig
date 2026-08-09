@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ user.firstName }},</p>
+
+        <p>
+            Cererea de cont angro pentru <strong>{{ user.companyName }}</strong>
+            nu a fost aprobată.
+        </p>
+
+        {% if reason %}
+            <p>Motiv: {{ reason }}</p>
+        {% endif %}
+
+        <p>Poți retrimite o cerere nouă oricând din contul tău.</p>
+
+        <p>Dacă ai întrebări, ne poți scrie la {{ store.email }}.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>
