@@ -94,6 +94,30 @@ class Order
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $adminNotes = null;
 
+    /**
+     * Snapshot al datelor firmei la momentul comenzii (nu se schimbă
+     * retroactiv dacă userul își editează datele firmei ulterior) — vezi
+     * tasks/17-checkout-facturare-angro.md.
+     */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingCompanyName = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $billingCompanyCui = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingCompanyRegCom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingCompanyAddress = null;
+
+    /**
+     * Setat dacă userul avea ROLE_WHOLESALE la momentul plasării comenzii,
+     * indiferent ce se întâmplă cu contul lui după aceea.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isWholesaleOrder = false;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -328,6 +352,66 @@ class Order
     public function setAdminNotes(?string $adminNotes): static
     {
         $this->adminNotes = $adminNotes;
+
+        return $this;
+    }
+
+    public function getBillingCompanyName(): ?string
+    {
+        return $this->billingCompanyName;
+    }
+
+    public function setBillingCompanyName(?string $billingCompanyName): static
+    {
+        $this->billingCompanyName = $billingCompanyName;
+
+        return $this;
+    }
+
+    public function getBillingCompanyCui(): ?string
+    {
+        return $this->billingCompanyCui;
+    }
+
+    public function setBillingCompanyCui(?string $billingCompanyCui): static
+    {
+        $this->billingCompanyCui = $billingCompanyCui;
+
+        return $this;
+    }
+
+    public function getBillingCompanyRegCom(): ?string
+    {
+        return $this->billingCompanyRegCom;
+    }
+
+    public function setBillingCompanyRegCom(?string $billingCompanyRegCom): static
+    {
+        $this->billingCompanyRegCom = $billingCompanyRegCom;
+
+        return $this;
+    }
+
+    public function getBillingCompanyAddress(): ?string
+    {
+        return $this->billingCompanyAddress;
+    }
+
+    public function setBillingCompanyAddress(?string $billingCompanyAddress): static
+    {
+        $this->billingCompanyAddress = $billingCompanyAddress;
+
+        return $this;
+    }
+
+    public function isWholesaleOrder(): bool
+    {
+        return $this->isWholesaleOrder;
+    }
+
+    public function setIsWholesaleOrder(bool $isWholesaleOrder): static
+    {
+        $this->isWholesaleOrder = $isWholesaleOrder;
 
         return $this;
     }

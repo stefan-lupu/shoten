@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address as EmailAddress;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
 final class OrderService
 {
@@ -24,6 +25,7 @@ final class OrderService
         private readonly MailerInterface $mailer,
         private readonly StoreConfig $store,
         private readonly CampaignEngine $campaignEngine,
+        private readonly RoleHierarchyInterface $roleHierarchy,
     ) {
     }
 
@@ -85,6 +87,21 @@ final class OrderService
                 ->setShippingCost($campaignResult->shippingCost)
                 ->setCouponCode($couponCode ?: null)
             ;
+
+            // Snapshot al datelor firmei la momentul comenzii, la fel ca
+            // adresa de livrare de mai sus — vezi tasks/17-checkout-facturare-angro.md.
+            // Verificăm prin RoleHierarchyInterface (nu User::getRoles() direct),
+            // ca un ROLE_ADMIN care moștenește ROLE_WHOLESALE să fie tratat identic
+            // cu un cont angro aprobat (aceeași convenție ca WholesalePricingResolver).
+            if (\in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
+                $order
+                    ->setIsWholesaleOrder(true)
+                    ->setBillingCompanyName($user->getCompanyName())
+                    ->setBillingCompanyCui($user->getCompanyCui())
+                    ->setBillingCompanyRegCom($user->getCompanyRegCom())
+                    ->setBillingCompanyAddress($user->getCompanyAddress())
+                ;
+            }
 
             foreach ($campaignResult->discounts as $discount) {
                 $discount->campaign->incrementUsesCount();

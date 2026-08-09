@@ -42,11 +42,21 @@
     </table>
 
     <div>
-        <strong>Client:</strong> {{ order.shippingFullName }}<br>
-        <span class="muted">
-            {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }},
-            {{ order.shippingPostalCode }} — tel. {{ order.shippingPhone }}
-        </span>
+        {% if order.isWholesaleOrder %}
+            <strong>Client:</strong> {{ order.billingCompanyName }}<br>
+            <span class="muted">
+                {% if order.billingCompanyCui %}CUI: {{ order.billingCompanyCui }}{% endif %}
+                {% if order.billingCompanyRegCom %} — Nr. Reg. Com.: {{ order.billingCompanyRegCom }}{% endif %}
+                <br>{{ order.billingCompanyAddress }}
+                <br>Persoană de contact: {{ order.shippingFullName }} — tel. {{ order.shippingPhone }}
+            </span>
+        {% else %}
+            <strong>Client:</strong> {{ order.shippingFullName }}<br>
+            <span class="muted">
+                {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }},
+                {{ order.shippingPostalCode }} — tel. {{ order.shippingPhone }}
+            </span>
+        {% endif %}
     </div>
 
     <table class="items">

@@ -17,12 +17,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -106,6 +108,10 @@ class OrderCrudController extends AbstractCrudController
             ->hideOnForm()
         ;
         yield NumberField::new('total', 'Total (lei)')->setNumDecimals(2)->hideOnForm();
+        // Setat automat la plasarea comenzii (vezi OrderService::placeOrder) —
+        // needitabil aici ca să nu se decupleze de datele billing* de mai jos.
+        yield BooleanField::new('isWholesaleOrder', 'Angro')->renderAsSwitch(false)->hideOnForm();
+        yield TextField::new('billingCompanyName', 'Firmă (angro)')->hideOnIndex()->hideOnForm();
         yield TextField::new('couponCode', 'Cod cupon')->hideOnIndex()->hideOnForm();
         yield TextField::new('trackingNumber', 'AWB / tracking')->setRequired(false);
         // Adresa de livrare e editabilă liber pe o comandă (ex: client sună
@@ -138,6 +144,7 @@ class OrderCrudController extends AbstractCrudController
                 'Ramburs' => PaymentMethod::Cod,
                 'Transfer bancar' => PaymentMethod::BankTransfer,
             ]))
+            ->add(BooleanFilter::new('isWholesaleOrder', 'Angro'))
             ->add(DateTimeFilter::new('createdAt', 'Data'))
         ;
     }
