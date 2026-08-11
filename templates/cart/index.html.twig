@@ -93,10 +93,12 @@
             <div class="alert alert-warning">{{ wholesaleMinimumWarning }}</div>
         {% endif %}
 
-        {% if is_granted('ROLE_USER') %}
-            <a href="{{ path('app_checkout') }}" class="btn btn-primary {{ wholesaleMinimumWarning ? 'disabled' : '' }}">Finalizează comanda</a>
-        {% else %}
-            <p><a href="{{ path('app_login') }}">Autentifică-te</a> pentru a finaliza comanda.</p>
+        <a href="{{ path('app_checkout') }}" class="btn btn-primary {{ wholesaleMinimumWarning ? 'disabled' : '' }}">Finalizează comanda</a>
+        {% if not is_granted('ROLE_USER') %}
+            <p class="small text-body-secondary mt-2">
+                Poți comanda și fără cont. <a href="{{ path('app_login') }}">Autentifică-te</a>
+                pentru plata cu cardul și adrese salvate.
+            </p>
         {% endif %}
     {% endif %}
 {% endblock %}
