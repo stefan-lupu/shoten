@@ -3,34 +3,44 @@
 {% block title %}Comenzile mele — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1 class="mb-4">Comenzile mele</h1>
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <h1 class="mb-0">Comenzile mele</h1>
+        <a href="{{ path('app_account') }}" class="small">← Înapoi la cont</a>
+    </div>
 
     {% if orders is empty %}
-        <p>Nu ai plasat încă nicio comandă.</p>
+        <div class="cart-empty text-center py-5">
+            <div class="cart-empty__icon mb-3">📦</div>
+            <h2 class="h4">Nicio comandă încă</h2>
+            <p class="text-body-secondary mb-4">Când plasezi prima comandă, o vei găsi aici.</p>
+            <a href="{{ path('app_home') }}" class="btn btn-primary">Începe cumpărăturile</a>
+        </div>
     {% else %}
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Comandă</th>
-                        <th>Data</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 orders-table">
+                    <thead>
                         <tr>
-                            <td>#{{ order.id }}</td>
-                            <td>{{ order.createdAt|date('d.m.Y H:i') }}</td>
-                            <td>{% include 'order/_status_badge.html.twig' with { status: order.status } %}</td>
-                            <td>{{ order.total }} lei</td>
-                            <td><a href="{{ path('app_order_show', { id: order.id }) }}" class="btn btn-sm btn-outline-secondary">Detalii</a></td>
+                            <th>Comandă</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th class="text-end">Total</th>
+                            <th></th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td class="fw-semibold">#{{ order.id }}</td>
+                                <td class="text-body-secondary">{{ order.createdAt|date('d.m.Y H:i') }}</td>
+                                <td>{% include 'order/_status_badge.html.twig' with { status: order.status } %}</td>
+                                <td class="text-end fw-semibold">{{ order.total }} lei</td>
+                                <td class="text-end"><a href="{{ path('app_order_show', { id: order.id }) }}" class="btn btn-sm btn-outline-primary">Detalii</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     {% endif %}
 {% endblock %}

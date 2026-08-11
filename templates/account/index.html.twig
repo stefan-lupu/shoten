@@ -3,40 +3,64 @@
 {% block title %}Contul meu — {{ store.name }}{% endblock %}
 
 {% block body %}
-    <h1 class="mb-3">Contul meu</h1>
-    <p>Salut, {{ app.user.firstName }}!</p>
-    <div class="d-flex gap-2">
-        <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary">Comenzile mele</a>
-        <a href="{{ path('app_address_index') }}" class="btn btn-outline-primary">Adresele mele</a>
-        {% if app.user.wholesaleStatus.value == 'approved' %}
-            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-success">Cont angro activ</a>
-        {% elseif app.user.wholesaleStatus.value == 'pending' %}
-            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-secondary">Cerere angro în așteptare</a>
-        {% else %}
-            <a href="{{ path('app_account_wholesale') }}" class="btn btn-outline-primary">Solicită cont angro</a>
-        {% endif %}
+    <div class="account-header mb-4">
+        <span class="section-eyebrow">Contul meu</span>
+        <h1 class="mb-1">Salut, {{ app.user.firstName }}!</h1>
+        <p class="text-body-secondary mb-0">Gestionează-ți comenzile, adresele și datele contului.</p>
     </div>
 
-    <hr class="my-4">
+    <div class="row g-3 account-grid">
+        <div class="col-sm-6 col-lg-4">
+            <a href="{{ path('app_order_index') }}" class="account-tile">
+                <span class="account-tile__icon">📦</span>
+                <span class="account-tile__title">Comenzile mele</span>
+                <span class="account-tile__desc">Istoric, status și facturi.</span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <a href="{{ path('app_address_index') }}" class="account-tile">
+                <span class="account-tile__icon">📍</span>
+                <span class="account-tile__title">Adresele mele</span>
+                <span class="account-tile__desc">Adrese salvate pentru livrare.</span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <a href="{{ path('app_account_wholesale') }}" class="account-tile">
+                <span class="account-tile__icon">🏢</span>
+                <span class="account-tile__title">Cont angro</span>
+                <span class="account-tile__desc">
+                    {% if app.user.wholesaleStatus.value == 'approved' %}
+                        <span class="badge text-bg-success">Activ</span>
+                    {% elseif app.user.wholesaleStatus.value == 'pending' %}
+                        <span class="badge text-bg-warning">Cerere în așteptare</span>
+                    {% else %}
+                        Solicită prețuri pentru firme.
+                    {% endif %}
+                </span>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <a href="{{ path('app_account_export') }}" class="account-tile">
+                <span class="account-tile__icon">⬇️</span>
+                <span class="account-tile__title">Datele mele</span>
+                <span class="account-tile__desc">Descarcă o copie (JSON) a datelor tale.</span>
+            </a>
+        </div>
+    </div>
 
-    <h2 class="h5">Datele mele</h2>
-    <p class="text-body-secondary">
-        Poți descărca o copie a tuturor datelor pe care le păstrăm despre
-        tine (profil, adrese, istoric comenzi), în format JSON.
-    </p>
-    <a href="{{ path('app_account_export') }}" class="btn btn-outline-primary">Descarcă datele mele</a>
-
-    <hr class="my-4">
-
-    <h2 class="h5">Zona de pericol</h2>
-    <p class="text-body-secondary">
-        Ștergerea contului îți anonimizează datele personale (nume, email,
-        telefon) și îți șterge adresele salvate. Comenzile deja plasate
-        rămân, din motive de evidență contabilă, dar nu mai sunt asociate
-        cu datele tale de identificare.
-    </p>
-    <form method="post" action="{{ path('app_account_delete') }}" data-confirm="Sigur vrei să îți ștergi contul? Această acțiune nu poate fi anulată.">
-        <input type="hidden" name="_token" value="{{ csrf_token('account_delete') }}">
-        <button type="submit" class="btn btn-outline-danger">Șterge contul</button>
-    </form>
+    <div class="card mt-4 danger-zone">
+        <div class="card-body">
+            <h2 class="h6 card-title text-danger">Zona de pericol</h2>
+            <p class="text-body-secondary small mb-3">
+                Ștergerea contului îți anonimizează datele personale (nume, email,
+                telefon) și îți șterge adresele salvate. Comenzile deja plasate
+                rămân, din motive de evidență contabilă, dar nu mai sunt asociate
+                cu datele tale de identificare.
+            </p>
+            <form method="post" action="{{ path('app_account_delete') }}" data-confirm="Sigur vrei să îți ștergi contul? Această acțiune nu poate fi anulată.">
+                <input type="hidden" name="_token" value="{{ csrf_token('account_delete') }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Șterge contul</button>
+            </form>
+        </div>
+    </div>
 {% endblock %}

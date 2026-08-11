@@ -605,6 +605,144 @@ h1 {
     white-space: nowrap;
 }
 
+/* =========================================================================
+   Cont & comenzi
+   ========================================================================= */
+
+/* ---- Dashboard cont: dale de acțiune ---- */
+.account-tile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: 1px solid rgba(var(--color-accent-rgb), .1);
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-shadow);
+    transition: transform .25s var(--ui-ease), box-shadow .25s var(--ui-ease), border-color .25s var(--ui-ease);
+}
+
+.account-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ui-shadow-lg);
+    border-color: rgba(var(--color-accent-rgb), .45);
+    color: var(--color-text);
+}
+
+.account-tile__icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: .6rem;
+}
+
+.account-tile__title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: .2rem;
+}
+
+.account-tile__desc {
+    font-size: .86rem;
+    color: var(--color-text-muted);
+}
+
+.danger-zone {
+    border-color: rgba(var(--bs-danger-rgb), .35) !important;
+}
+
+/* ---- Tabel comenzi: rânduri cu hover ---- */
+.orders-table tbody tr {
+    transition: background-color .15s var(--ui-ease);
+}
+
+.orders-table tbody tr:hover {
+    background-color: rgba(var(--color-accent-rgb), .05);
+}
+
+/* ---- Traseul comenzii (timeline orizontal) ---- */
+.order-timeline {
+    list-style: none;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    margin: 1.25rem 0 .5rem;
+    counter-reset: step;
+}
+
+.order-timeline__step {
+    position: relative;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: .25rem;
+    color: var(--color-text-muted);
+}
+
+/* Linia care leagă pașii (în spatele punctelor). */
+.order-timeline__step::before {
+    content: "";
+    position: absolute;
+    top: calc(.25rem + 1.1rem);
+    right: 50%;
+    width: 100%;
+    height: 3px;
+    background-color: rgba(var(--color-accent-rgb), .15);
+    z-index: 0;
+}
+
+.order-timeline__step:first-child::before {
+    display: none;
+}
+
+.order-timeline__step.is-done::before {
+    background-color: var(--color-accent);
+}
+
+.order-timeline__dot {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    margin-bottom: .4rem;
+    font-size: 1rem;
+    background-color: var(--color-surface);
+    border: 2px solid rgba(var(--color-accent-rgb), .2);
+    border-radius: 999px;
+    filter: grayscale(1) opacity(.5);
+    transition: all .25s var(--ui-ease);
+}
+
+.order-timeline__step.is-done .order-timeline__dot {
+    border-color: var(--color-accent);
+    filter: none;
+}
+
+.order-timeline__step.is-current .order-timeline__dot {
+    box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), .18);
+    border-color: var(--color-accent-strong);
+}
+
+.order-timeline__label {
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.order-timeline__step.is-done .order-timeline__label {
+    color: var(--color-text);
+}
+
+.order-timeline__date {
+    font-size: .72rem;
+    color: var(--color-text-muted);
+}
+
 /* ---- Footer: separare mai clară ---- */
 footer.container {
     border-top-color: rgba(var(--color-accent-rgb), .15) !important;

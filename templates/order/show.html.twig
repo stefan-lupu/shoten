@@ -19,116 +19,191 @@
 {% endblock %}
 
 {% block body %}
-    <h1 class="mb-3">Comanda #{{ order.id }}</h1>
-    <p>Status: {% include 'order/_status_badge.html.twig' with { status: order.status } %}</p>
-    <p>Plată: {{ order.paymentMethod.value }} ({{ order.paymentStatus.value }})</p>
-    <p>Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
-    {% if order.trackingNumber %}
-        <p>Număr AWB:
-            {% if store.courierTrackingUrl %}
-                <a href="{{ store.courierTrackingUrl|replace({'{awb}': order.trackingNumber}) }}" target="_blank" rel="noopener"><strong>{{ order.trackingNumber }}</strong></a>
-            {% else %}
-                <strong>{{ order.trackingNumber }}</strong>
-            {% endif %}
-        </p>
-    {% endif %}
-    {% if order.refundedAt %}
-        <p class="text-warning">Rambursată la {{ order.refundedAt|date('d.m.Y H:i') }}.</p>
-    {% endif %}
-
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>Produs</th>
-                    <th>Cantitate</th>
-                    <th>Preț unitar</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in order.items %}
-                    <tr>
-                        <td>{{ item.productName }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.unitPrice }} lei</td>
-                        <td>{{ item.subtotal }} lei</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="d-flex align-items-center justify-content-between mb-1 flex-wrap gap-2">
+        <h1 class="mb-0">Comanda #{{ order.id }}</h1>
+        {% include 'order/_status_badge.html.twig' with { status: order.status } %}
     </div>
+    <p class="text-body-secondary">Plasată la {{ order.createdAt|date('d.m.Y H:i') }}</p>
 
-    <p class="mb-1">
-        Transport:
-        {% if order.shippingCost == '0.00' %}
-            <span class="text-success">Gratuit</span>
-        {% else %}
-            {{ order.shippingCost }} lei
-        {% endif %}
-    </p>
-    <p class="fs-5">Total: <strong>{{ order.total }} lei</strong></p>
+    {# ---- Traseul comenzii ---- #}
+    {% if order.status.value == 'cancelled' %}
+        <div class="alert alert-danger">Această comandă a fost anulată.</div>
+    {% else %}
+        {% set statusOrder = { pending: 1, confirmed: 2, shipped: 3, delivered: 4 } %}
+        {% set current = statusOrder[order.status.value] %}
+        {% set steps = [
+            { n: 1, label: 'Plasată', icon: '🧾' },
+            { n: 2, label: 'Confirmată', icon: '✅' },
+            { n: 3, label: 'Expediată', icon: '🚚' },
+            { n: 4, label: 'Livrată', icon: '📬' }
+        ] %}
+        <ol class="order-timeline">
+            {% for step in steps %}
+                <li class="order-timeline__step {{ step.n <= current ? 'is-done' : '' }} {{ step.n == current ? 'is-current' : '' }}">
+                    <span class="order-timeline__dot">{{ step.icon }}</span>
+                    <span class="order-timeline__label">{{ step.label }}</span>
+                    {% if step.n == 1 %}
+                        <span class="order-timeline__date">{{ order.createdAt|date('d.m.Y') }}</span>
+                    {% elseif step.n == 4 and order.deliveredAt %}
+                        <span class="order-timeline__date">{{ order.deliveredAt|date('d.m.Y') }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
 
-    <a href="{{ path('app_order_invoice', { id: order.id }) }}" class="btn btn-outline-secondary" target="_blank">Descarcă factura (PDF)</a>
+    <div class="row g-4 mt-1">
+        {# ---- Produse + totaluri ---- #}
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5 card-title mb-3">Produse</h2>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Produs</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-end">Preț unitar</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                    <tr>
+                                        <td>{{ item.productName }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-end">{{ item.unitPrice }} lei</td>
+                                        <td class="text-end">{{ item.subtotal }} lei</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-    {% if order.paymentMethod.value == 'bank_transfer' and order.paymentStatus.value != 'paid' %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h2 class="h5 card-title">Detalii transfer bancar</h2>
-                <p class="mb-1">Titular: {{ store.name }}</p>
-                <p class="mb-1">Bancă: {{ store.bankName }}</p>
-                <p class="mb-1">IBAN: {{ store.bankAccount }}</p>
-                <p class="mb-0">Menționează în detaliile transferului numărul comenzii: <strong>#{{ order.id }}</strong></p>
+                    <dl class="summary-lines mt-3 mb-0">
+                        <div class="summary-row">
+                            <dt>Transport</dt>
+                            <dd>
+                                {% if order.shippingCost == '0.00' %}
+                                    <span class="text-success">Gratuit</span>
+                                {% else %}
+                                    {{ order.shippingCost }} lei
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="summary-row summary-row--total">
+                            <dt>Total</dt>
+                            <dd>{{ order.total }} lei</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{{ path('app_order_invoice', { id: order.id }) }}" class="btn btn-outline-primary" target="_blank">Descarcă factura (PDF)</a>
+
+                {% if order.paymentMethod.value == 'card' and order.paymentStatus.value != 'paid' %}
+                    <form method="post" action="{{ path('app_order_retry_payment', { id: order.id }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('order_retry_payment_' ~ order.id) }}">
+                        <button type="submit" class="btn btn-primary">Reîncearcă plata</button>
+                    </form>
+                {% endif %}
+
+                {% if order.status.value == 'pending' %}
+                    <form method="post" action="{{ path('app_order_cancel', { id: order.id }) }}" data-confirm="Sigur anulezi această comandă?">
+                        <input type="hidden" name="_token" value="{{ csrf_token('order_cancel_' ~ order.id) }}">
+                        <button type="submit" class="btn btn-outline-danger">Anulează comanda</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
-    {% endif %}
 
-    {% if order.paymentMethod.value == 'card' and order.paymentStatus.value != 'paid' %}
-        <form method="post" action="{{ path('app_order_retry_payment', { id: order.id }) }}" class="d-inline">
-            <input type="hidden" name="_token" value="{{ csrf_token('order_retry_payment_' ~ order.id) }}">
-            <button type="submit" class="btn btn-primary">Reîncearcă plata</button>
-        </form>
-    {% endif %}
+        {# ---- Livrare, plată, AWB ---- #}
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h6 card-title text-uppercase text-body-secondary" style="letter-spacing: .08em; font-size: .78rem">Livrare</h2>
+                    <p class="mb-1 fw-semibold">{{ order.shippingFullName }}</p>
+                    <p class="mb-1">{{ order.shippingStreet }}</p>
+                    <p class="mb-1">{{ order.shippingCity }}, {{ order.shippingCounty }} {{ order.shippingPostalCode }}</p>
+                    <p class="mb-0 text-body-secondary">tel. {{ order.shippingPhone }}</p>
 
-    {% if order.status.value == 'pending' %}
-        <form method="post" action="{{ path('app_order_cancel', { id: order.id }) }}" class="d-inline" data-confirm="Sigur anulezi această comandă?">
-            <input type="hidden" name="_token" value="{{ csrf_token('order_cancel_' ~ order.id) }}">
-            <button type="submit" class="btn btn-outline-danger">Anulează comanda</button>
-        </form>
-    {% endif %}
+                    {% if order.trackingNumber %}
+                        <hr class="my-3">
+                        <h2 class="h6 card-title text-uppercase text-body-secondary" style="letter-spacing: .08em; font-size: .78rem">Urmărire AWB</h2>
+                        <p class="mb-0">
+                            {% if store.courierTrackingUrl %}
+                                <a href="{{ store.courierTrackingUrl|replace({'{awb}': order.trackingNumber}) }}" target="_blank" rel="noopener"><strong>{{ order.trackingNumber }}</strong> ↗</a>
+                            {% else %}
+                                <strong>{{ order.trackingNumber }}</strong>
+                            {% endif %}
+                        </p>
+                    {% endif %}
 
-    <hr class="my-4">
-
-    <h2 class="h5">Retur</h2>
-    {% if existingReturn %}
-        <p>
-            Ai o cerere de retur pentru această comandă, trimisă la
-            {{ existingReturn.createdAt|date('d.m.Y') }}. Status:
-            {% set rs = existingReturn.status.value %}
-            <span class="badge text-bg-{{ rs == 'approved' ? 'success' : (rs == 'rejected' ? 'danger' : (rs == 'completed' ? 'secondary' : 'warning')) }}">
-                {{ { 'requested': 'În analiză', 'approved': 'Aprobat', 'rejected': 'Respins', 'completed': 'Finalizat' }[rs] }}
-            </span>
-        </p>
-        {% if existingReturn.adminNote %}
-            <p class="text-body-secondary">{{ existingReturn.adminNote|nl2br }}</p>
-        {% endif %}
-    {% elseif canRequestReturn %}
-        <p class="text-body-secondary">
-            Ai dreptul de a returna produsele în {{ returnWindowDays }} zile de la
-            livrare, fără justificare. Descrie pe scurt motivul și îți trimitem
-            instrucțiunile de retur.
-        </p>
-        <form method="post" action="{{ path('app_order_return', { id: order.id }) }}" data-confirm="Trimiți cererea de retur pentru această comandă?">
-            <input type="hidden" name="_token" value="{{ csrf_token('order_return_' ~ order.id) }}">
-            <div class="mb-2" style="max-width: 32rem">
-                <textarea name="reason" class="form-control" rows="3" placeholder="Motivul returului" required></textarea>
+                    <hr class="my-3">
+                    <h2 class="h6 card-title text-uppercase text-body-secondary" style="letter-spacing: .08em; font-size: .78rem">Plată</h2>
+                    <p class="mb-1">Metodă: {{ order.paymentMethod.value }}</p>
+                    <p class="mb-0">
+                        Status:
+                        {% set ps = order.paymentStatus.value %}
+                        <span class="badge text-bg-{{ ps == 'paid' ? 'success' : (ps == 'refunded' ? 'warning' : 'secondary') }}">{{ ps }}</span>
+                    </p>
+                    {% if order.refundedAt %}
+                        <p class="text-warning small mb-0 mt-1">Rambursată la {{ order.refundedAt|date('d.m.Y H:i') }}.</p>
+                    {% endif %}
+                </div>
             </div>
-            <button type="submit" class="btn btn-outline-primary">Cere retur</button>
-        </form>
-    {% else %}
-        <p class="text-body-secondary">
-            Returul se poate cere doar pentru comenzi livrate, în termen de
-            {{ returnWindowDays }} zile de la livrare.
-        </p>
-    {% endif %}
+
+            {% if order.paymentMethod.value == 'bank_transfer' and order.paymentStatus.value != 'paid' %}
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h2 class="h6 card-title">Detalii transfer bancar</h2>
+                        <p class="mb-1">Titular: {{ store.name }}</p>
+                        <p class="mb-1">Bancă: {{ store.bankName }}</p>
+                        <p class="mb-1">IBAN: {{ store.bankAccount }}</p>
+                        <p class="mb-0">Menționează numărul comenzii: <strong>#{{ order.id }}</strong></p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ---- Retur ---- #}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5 card-title">Retur</h2>
+            {% if existingReturn %}
+                <p class="mb-1">
+                    Ai o cerere de retur pentru această comandă, trimisă la
+                    {{ existingReturn.createdAt|date('d.m.Y') }}. Status:
+                    {% set rs = existingReturn.status.value %}
+                    <span class="badge text-bg-{{ rs == 'approved' ? 'success' : (rs == 'rejected' ? 'danger' : (rs == 'completed' ? 'secondary' : 'warning')) }}">
+                        {{ { 'requested': 'În analiză', 'approved': 'Aprobat', 'rejected': 'Respins', 'completed': 'Finalizat' }[rs] }}
+                    </span>
+                </p>
+                {% if existingReturn.adminNote %}
+                    <p class="text-body-secondary mb-0">{{ existingReturn.adminNote|nl2br }}</p>
+                {% endif %}
+            {% elseif canRequestReturn %}
+                <p class="text-body-secondary">
+                    Ai dreptul de a returna produsele în {{ returnWindowDays }} zile de la
+                    livrare, fără justificare. Descrie pe scurt motivul și îți trimitem
+                    instrucțiunile de retur.
+                </p>
+                <form method="post" action="{{ path('app_order_return', { id: order.id }) }}" data-confirm="Trimiți cererea de retur pentru această comandă?">
+                    <input type="hidden" name="_token" value="{{ csrf_token('order_return_' ~ order.id) }}">
+                    <div class="mb-2" style="max-width: 32rem">
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Motivul returului" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Cere retur</button>
+                </form>
+            {% else %}
+                <p class="text-body-secondary mb-0">
+                    Returul se poate cere doar pentru comenzi livrate, în termen de
+                    {{ returnWindowDays }} zile de la livrare.
+                </p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
