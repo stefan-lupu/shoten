@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Cerere nouă de retur pentru comanda #{{ order.id }} ({{ order.shippingFullName }}, {{ order.user.email }}):</p>
+
+        <p><strong>Motiv:</strong> {{ returnRequest.reason|nl2br }}</p>
+
+        <p>Procesează cererea din panoul de admin → Retururi.</p>
+    </body>
+</html>

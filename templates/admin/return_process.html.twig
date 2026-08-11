@@ -1,0 +1,26 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Procesează cererea de retur{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted mb-1">Comanda #{{ returnRequest.order.id }} — {{ returnRequest.order.shippingFullName }}</p>
+            <p><strong>Motivul clientului:</strong> {{ returnRequest.reason|nl2br }}</p>
+
+            <form method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('return_process_' ~ returnRequest.id) }}">
+                <div class="mb-3">
+                    <label class="form-label" for="note">Notă pentru client (opțional — instrucțiuni de retur sau motivul respingerii)</label>
+                    <textarea class="form-control" id="note" name="note" rows="4"></textarea>
+                </div>
+                <button type="submit" name="decision" value="approve" class="btn btn-success" onclick="return confirm('Aprobi acest retur?')">
+                    Aprobă returul
+                </button>
+                <button type="submit" name="decision" value="reject" class="btn btn-danger" onclick="return confirm('Respingi acest retur?')">
+                    Respinge returul
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

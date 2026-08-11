@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>
+            Am înregistrat cererea ta de retur pentru comanda #{{ order.id }}
+            la <strong>{{ store.name }}</strong>.
+        </p>
+
+        <p><strong>Motiv:</strong> {{ returnRequest.reason|nl2br }}</p>
+
+        <p>
+            O verificăm și îți trimitem în curând instrucțiunile de retur
+            (adresa de returnare și pașii de urmat).
+        </p>
+
+        <p>Dacă ai întrebări, ne poți scrie la {{ store.email }}.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>

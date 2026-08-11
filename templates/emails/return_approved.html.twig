@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Cererea ta de retur pentru comanda #{{ order.id }} a fost <strong>aprobată</strong>.</p>
+
+        {% if returnRequest.adminNote %}
+            <p>{{ returnRequest.adminNote|nl2br }}</p>
+        {% endif %}
+
+        <p>
+            După ce primim produsele returnate și le verificăm, îți rambursăm
+            contravaloarea. Dacă ai întrebări, scrie-ne la {{ store.email }}.
+        </p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>

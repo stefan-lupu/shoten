@@ -71,6 +71,7 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Vânzări')->setPermission('ROLE_ORDERS_VIEWER');
         yield MenuItem::linkTo(OrderCrudController::class, 'Comenzi', 'fa fa-receipt')->setPermission('ROLE_ORDERS_VIEWER');
+        yield MenuItem::linkTo(ReturnRequestCrudController::class, 'Retururi', 'fa fa-rotate-left')->setPermission('ROLE_ADMIN');
         yield MenuItem::linkTo(CampaignCrudController::class, 'Campanii', 'fa fa-tags')->setPermission('ROLE_ADMIN');
         yield MenuItem::linkTo(CampaignProductCrudController::class, 'Produse în campanii', 'fa fa-tag')->setPermission('ROLE_ADMIN');
 

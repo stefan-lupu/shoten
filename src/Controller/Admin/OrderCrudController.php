@@ -129,6 +129,7 @@ class OrderCrudController extends AbstractCrudController
         yield TextareaField::new('adminNotes', 'Notițe interne')->setRequired(false)->hideOnIndex()->setHelp('Vizibile doar în admin — clientul nu le vede niciodată.');
         yield TextField::new('refundReason', 'Motiv rambursare')->hideOnIndex()->hideOnForm();
         yield DateTimeField::new('refundedAt', 'Rambursată la')->hideOnIndex()->hideOnForm();
+        yield DateTimeField::new('deliveredAt', 'Livrată la')->hideOnIndex()->hideOnForm();
         yield DateTimeField::new('createdAt', 'Data')->hideOnForm();
     }
 
@@ -184,6 +185,18 @@ class OrderCrudController extends AbstractCrudController
                 ->generateUrl())
             ->displayIf(static fn (Order $order) => !\in_array($order->getStatus(), [OrderStatus::Shipped, OrderStatus::Delivered, OrderStatus::Cancelled], true))
         ;
+        $markDelivered = Action::new('markDelivered', 'Marchează ca livrată', 'fa fa-box-open')
+            ->linkToUrl(fn (Order $order) => $this->adminUrlGenerator
+                ->unsetAll()
+                ->setController(self::class)
+                ->setAction('markDelivered')
+                ->setEntityId($order->getId())
+                ->set('_token', $this->csrfTokenManager->getToken('mark_delivered_'.$order->getId())->getValue())
+                ->generateUrl())
+            // Doar din „Expediată" — livrarea vine după expediere. Momentul
+            // livrării pornește fereastra de retur de 14 zile (vezi ReturnRequest).
+            ->displayIf(static fn (Order $order) => OrderStatus::Shipped === $order->getStatus())
+        ;
         $invoice = Action::new('invoice', 'Factură (PDF)', 'fa fa-file-pdf')
             ->linkToRoute('app_order_invoice', static fn (Order $order) => ['id' => $order->getId()])
             ->setHtmlAttributes(['target' => '_blank'])
@@ -212,17 +225,20 @@ class OrderCrudController extends AbstractCrudController
             ->disable(Action::NEW, Action::DELETE)
             ->add(Crud::PAGE_INDEX, $markPaid)
             ->add(Crud::PAGE_INDEX, $markShipped)
+            ->add(Crud::PAGE_INDEX, $markDelivered)
             ->add(Crud::PAGE_INDEX, $invoice)
             ->add(Crud::PAGE_INDEX, $cancelOrder)
             ->add(Crud::PAGE_INDEX, $exportCsv)
             ->add(Crud::PAGE_DETAIL, $markPaid)
             ->add(Crud::PAGE_DETAIL, $markShipped)
+            ->add(Crud::PAGE_DETAIL, $markDelivered)
             ->add(Crud::PAGE_DETAIL, $invoice)
             ->add(Crud::PAGE_DETAIL, $cancelOrder)
-            // Financiarul confirmă plata, Comenzi gestionează expedierea — fiecare
+            // Financiarul confirmă plata, Comenzi gestionează expedierea/livrarea — fiecare
             // vede/poate declanșa doar acțiunea din aria lui (ROLE_ADMIN le are pe amândouă).
             ->setPermission('markPaid', 'ROLE_FINANCE_MANAGER')
             ->setPermission('markShipped', 'ROLE_ORDERS_MANAGER')
+            ->setPermission('markDelivered', 'ROLE_ORDERS_MANAGER')
             // Anularea/rambursarea și editarea adresei rămân doar la admin — au impact financiar/legal.
             ->setPermission('adminCancelOrder', 'ROLE_ADMIN')
             ->setPermission(Action::EDIT, 'ROLE_ADMIN')
@@ -276,6 +292,24 @@ class OrderCrudController extends AbstractCrudController
         }
         if ($order) {
             $order->setStatus(OrderStatus::Shipped);
+            $entityManager->flush();
+        }
+
+        return $this->redirect($adminUrlGenerator->setController(self::class)->setAction(Action::DETAIL)->setEntityId($order?->getId())->generateUrl());
+    }
+
+    #[AdminRoute(path: '/mark-delivered', name: 'mark_delivered')]
+    #[IsGranted('ROLE_ORDERS_MANAGER')]
+    public function markDelivered(Request $request, EntityManagerInterface $entityManager, AdminUrlGenerator $adminUrlGenerator): RedirectResponse
+    {
+        $order = $entityManager->getRepository(Order::class)->find($request->query->get('entityId'));
+        if ($order && !$this->isCsrfTokenValid('mark_delivered_'.$order->getId(), $request->query->get('_token'))) {
+            $this->addFlash('danger', 'Token de securitate invalid sau expirat — reîncearcă din pagina comenzii.');
+
+            return $this->redirect($adminUrlGenerator->setController(self::class)->setAction(Action::DETAIL)->setEntityId($order->getId())->generateUrl());
+        }
+        if ($order && OrderStatus::Shipped === $order->getStatus()) {
+            $order->markDelivered();
             $entityManager->flush();
         }
 

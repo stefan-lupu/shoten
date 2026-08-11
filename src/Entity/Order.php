@@ -76,6 +76,14 @@ class Order
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $couponCode = null;
 
+    /**
+     * Momentul livrării — setat la marcarea comenzii ca livrată. E baza de
+     * la care curge fereastra legală de retragere de 14 zile (returul se
+     * calculează de la primirea mărfii, nu de la plasarea comenzii).
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deliveredAt = null;
+
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $refundedAt = null;
 
@@ -423,6 +431,19 @@ class Order
     public function setIsWholesaleOrder(bool $isWholesaleOrder): static
     {
         $this->isWholesaleOrder = $isWholesaleOrder;
+
+        return $this;
+    }
+
+    public function getDeliveredAt(): ?\DateTimeImmutable
+    {
+        return $this->deliveredAt;
+    }
+
+    public function markDelivered(): static
+    {
+        $this->status = OrderStatus::Delivered;
+        $this->deliveredAt = new \DateTimeImmutable();
 
         return $this;
     }

@@ -90,4 +90,39 @@
             <button type="submit" class="btn btn-outline-danger">Anulează comanda</button>
         </form>
     {% endif %}
+
+    <hr class="my-4">
+
+    <h2 class="h5">Retur</h2>
+    {% if existingReturn %}
+        <p>
+            Ai o cerere de retur pentru această comandă, trimisă la
+            {{ existingReturn.createdAt|date('d.m.Y') }}. Status:
+            {% set rs = existingReturn.status.value %}
+            <span class="badge text-bg-{{ rs == 'approved' ? 'success' : (rs == 'rejected' ? 'danger' : (rs == 'completed' ? 'secondary' : 'warning')) }}">
+                {{ { 'requested': 'În analiză', 'approved': 'Aprobat', 'rejected': 'Respins', 'completed': 'Finalizat' }[rs] }}
+            </span>
+        </p>
+        {% if existingReturn.adminNote %}
+            <p class="text-body-secondary">{{ existingReturn.adminNote|nl2br }}</p>
+        {% endif %}
+    {% elseif canRequestReturn %}
+        <p class="text-body-secondary">
+            Ai dreptul de a returna produsele în {{ returnWindowDays }} zile de la
+            livrare, fără justificare. Descrie pe scurt motivul și îți trimitem
+            instrucțiunile de retur.
+        </p>
+        <form method="post" action="{{ path('app_order_return', { id: order.id }) }}" data-confirm="Trimiți cererea de retur pentru această comandă?">
+            <input type="hidden" name="_token" value="{{ csrf_token('order_return_' ~ order.id) }}">
+            <div class="mb-2" style="max-width: 32rem">
+                <textarea name="reason" class="form-control" rows="3" placeholder="Motivul returului" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Cere retur</button>
+        </form>
+    {% else %}
+        <p class="text-body-secondary">
+            Returul se poate cere doar pentru comenzi livrate, în termen de
+            {{ returnWindowDays }} zile de la livrare.
+        </p>
+    {% endif %}
 {% endblock %}

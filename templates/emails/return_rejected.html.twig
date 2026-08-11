@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Cererea ta de retur pentru comanda #{{ order.id }} nu a putut fi aprobată.</p>
+
+        {% if returnRequest.adminNote %}
+            <p><strong>Motiv:</strong> {{ returnRequest.adminNote|nl2br }}</p>
+        {% endif %}
+
+        <p>Dacă ai întrebări sau crezi că e o eroare, scrie-ne la {{ store.email }}.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>
