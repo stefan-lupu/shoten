@@ -103,11 +103,24 @@ class Product
     #[ORM\OrderBy(['minQuantity' => 'ASC'])]
     private Collection $wholesaleTiers;
 
+    /**
+     * Produse sugerate manual din admin — afișate primele în secțiunea
+     * „Produse recomandate" de pe pagina acestui produs (vezi
+     * App\Service\RelatedProductsProvider). Relație unidirecțională: A
+     * sugerează B nu implică automat B sugerează A.
+     *
+     * @var Collection<int, Product>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class)]
+    #[ORM\JoinTable(name: 'product_suggested')]
+    private Collection $suggestedProducts;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->images = new ArrayCollection();
         $this->wholesaleTiers = new ArrayCollection();
+        $this->suggestedProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -377,6 +390,31 @@ class Product
                 $tier->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getSuggestedProducts(): Collection
+    {
+        return $this->suggestedProducts;
+    }
+
+    public function addSuggestedProduct(self $product): static
+    {
+        // Nu ne sugerăm pe noi înșine și nu dublăm.
+        if ($product !== $this && !$this->suggestedProducts->contains($product)) {
+            $this->suggestedProducts->add($product);
+        }
+
+        return $this;
+    }
+
+    public function removeSuggestedProduct(self $product): static
+    {
+        $this->suggestedProducts->removeElement($product);
 
         return $this;
     }

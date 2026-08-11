@@ -100,6 +100,13 @@ class ProductCrudController extends AbstractCrudController
             ->hideOnIndex()
             ->setHelp('Praguri de cantitate → preț/buc, vizibile doar clienților cu cont angro aprobat. Adaugă-le în ordine crescătoare a cantității, cu prețul scăzând (sau rămânând constant) la fiecare prag.')
         ;
+        yield AssociationField::new('suggestedProducts', 'Produse sugerate')
+            ->setFormTypeOption('by_reference', false)
+            ->autocomplete()
+            ->hideOnIndex()
+            ->setFormTypeOption('disabled', !$canEditAll)
+            ->setHelp('Apar primele în secțiunea „Produse recomandate” de pe pagina acestui produs, în ordinea adăugării. Restul locurilor se completează cu produse din aceeași categorie.')
+        ;
         yield DateTimeField::new('createdAt')->hideOnForm();
     }
 

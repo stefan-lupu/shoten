@@ -117,6 +117,68 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * Produse aflate în stoc dintr-o categorie, excluzând id-urile date
+     * (produsul curent + cele deja sugerate). Promovatele apar primele.
+     * Folosit de App\Service\RelatedProductsProvider.
+     *
+     * @param int[] $excludeIds
+     *
+     * @return Product[]
+     */
+    public function findInStockByCategory(int $categoryId, array $excludeIds, int $limit): array
+    {
+        if ($limit <= 0) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.category = :category')
+            ->andWhere('p.stockStatus = :status')
+            ->andWhere('p.stock > 0')
+            ->andWhere('p.id NOT IN (:exclude)')
+            ->setParameter('category', $categoryId)
+            ->setParameter('status', StockStatus::InStock)
+            ->setParameter('exclude', $excludeIds ?: [0])
+            ->orderBy('p.isPromoted', 'DESC')
+            ->addOrderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * Produse aflate în stoc din tot magazinul, în ordine aleatorie —
+     * fallback pentru „Produse recomandate" când categoria produsului n-are
+     * nimic în stoc. Amestecăm în PHP (DQL n-are RAND() portabil) pe un
+     * pool mărginit, ca să nu încărcăm tot catalogul.
+     *
+     * @param int[] $excludeIds
+     *
+     * @return Product[]
+     */
+    public function findRandomInStock(array $excludeIds, int $limit): array
+    {
+        if ($limit <= 0) {
+            return [];
+        }
+
+        $pool = $this->createQueryBuilder('p')
+            ->andWhere('p.stockStatus = :status')
+            ->andWhere('p.stock > 0')
+            ->andWhere('p.id NOT IN (:exclude)')
+            ->setParameter('status', StockStatus::InStock)
+            ->setParameter('exclude', $excludeIds ?: [0])
+            ->setMaxResults(30)
+            ->getQuery()
+            ->getResult()
+        ;
+        shuffle($pool);
+
+        return \array_slice($pool, 0, $limit);
+    }
+
+    /**
      * Produse in_stock cu stoc sub pragul dat — pentru alerta din dashboard-ul admin.
      *
      * @return Product[]

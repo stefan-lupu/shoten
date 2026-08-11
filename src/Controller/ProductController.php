@@ -10,6 +10,7 @@ use App\Form\StockNotificationRequestType;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ReviewRepository;
+use App\Service\RelatedProductsProvider;
 use App\Service\StockNotificationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -85,7 +86,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/produs/{slug}', name: 'app_product_show')]
-    public function show(string $slug, ProductRepository $productRepository, ReviewRepository $reviewRepository): Response
+    public function show(string $slug, ProductRepository $productRepository, ReviewRepository $reviewRepository, RelatedProductsProvider $relatedProductsProvider): Response
     {
         $product = $productRepository->findOneBy(['slug' => $slug]);
         if (!$product) {
@@ -118,6 +119,7 @@ final class ProductController extends AbstractController
             'reviewForm' => $reviewForm?->createView(),
             'hasReviewed' => $hasReviewed,
             'stockNotificationForm' => $stockNotificationForm?->createView(),
+            'relatedProducts' => $relatedProductsProvider->forProduct($product),
         ]);
     }
 

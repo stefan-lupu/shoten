@@ -158,4 +158,15 @@
             {% endif %}
         </div>
     </div>
+
+    {% if relatedProducts is not empty %}
+        <section class="mt-5">
+            <h2 class="h4 mb-3">Produse Recomandate</h2>
+            <div class="row row-cols-2 row-cols-md-4 g-4">
+                {% for product in relatedProducts %}
+                    {% include 'product/_card.html.twig' %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}
