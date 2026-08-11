@@ -24,7 +24,13 @@
     <p>Plată: {{ order.paymentMethod.value }} ({{ order.paymentStatus.value }})</p>
     <p>Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
     {% if order.trackingNumber %}
-        <p>Număr AWB: <strong>{{ order.trackingNumber }}</strong></p>
+        <p>Număr AWB:
+            {% if store.courierTrackingUrl %}
+                <a href="{{ store.courierTrackingUrl|replace({'{awb}': order.trackingNumber}) }}" target="_blank" rel="noopener"><strong>{{ order.trackingNumber }}</strong></a>
+            {% else %}
+                <strong>{{ order.trackingNumber }}</strong>
+            {% endif %}
+        </p>
     {% endif %}
     {% if order.refundedAt %}
         <p class="text-warning">Rambursată la {{ order.refundedAt|date('d.m.Y H:i') }}.</p>
