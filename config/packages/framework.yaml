@@ -8,6 +8,17 @@ framework:
     #esi: true
     #fragments: true
 
+when@dev:
+    framework:
+        session:
+            # Doar în dev: ridicăm durata de viață a sesiunii la o zi.
+            # Cu valoarea implicită (1440s = 24 min), sesiunea era ștearsă
+            # de garbage collector în timpul rulărilor lungi din dezvoltare
+            # (migrări, cache:clear, teste), delogând userul. NU afectează
+            # producția — vezi când@prod folosește valorile implicite.
+            gc_maxlifetime: 86400
+            cookie_lifetime: 86400
+
 when@test:
     framework:
         test: true
