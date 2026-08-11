@@ -35,6 +35,7 @@ services:
             $companyAddress: '%env(STORE_COMPANY_ADDRESS)%'
             $vatPayer: '%env(bool:STORE_VAT_PAYER)%'
             $vatRate: '%env(STORE_VAT_RATE)%'
+            $invoiceSeries: '%env(STORE_INVOICE_SERIES)%'
             $logoPath: '%env(THEME_LOGO_PATH)%'
             $faviconPath: '%env(THEME_FAVICON_PATH)%'
             $adsenseClientId: '%env(GOOGLE_ADSENSE_CLIENT_ID)%'

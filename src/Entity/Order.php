@@ -118,6 +118,17 @@ class Order
     #[ORM\Column(options: ['default' => false])]
     private bool $isWholesaleOrder = false;
 
+    /**
+     * Seria + numărul facturii fiscale, atribuite o singură dată la prima
+     * emitere a facturii (vezi App\Service\InvoiceNumberAllocator). Rămân
+     * fixe după atribuire — factura are întotdeauna același număr.
+     */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $invoiceSeries = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $invoiceNumber = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -414,6 +425,42 @@ class Order
         $this->isWholesaleOrder = $isWholesaleOrder;
 
         return $this;
+    }
+
+    public function getInvoiceSeries(): ?string
+    {
+        return $this->invoiceSeries;
+    }
+
+    public function getInvoiceNumber(): ?int
+    {
+        return $this->invoiceNumber;
+    }
+
+    public function hasInvoiceNumber(): bool
+    {
+        return null !== $this->invoiceNumber;
+    }
+
+    public function assignInvoiceNumber(string $series, int $number): static
+    {
+        $this->invoiceSeries = $series;
+        $this->invoiceNumber = $number;
+
+        return $this;
+    }
+
+    /**
+     * Identificatorul complet al facturii, ex „RJ-0042", sau null dacă
+     * factura nu a fost încă emisă.
+     */
+    public function getInvoiceLabel(): ?string
+    {
+        if (null === $this->invoiceNumber) {
+            return null;
+        }
+
+        return sprintf('%s-%04d', $this->invoiceSeries, $this->invoiceNumber);
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

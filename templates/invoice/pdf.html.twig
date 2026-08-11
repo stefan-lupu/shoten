@@ -35,6 +35,9 @@
             </td>
             <td class="right">
                 <h1>Factură / Chitanță</h1>
+                {% if order.invoiceLabel %}
+                    <div><strong>Seria {{ order.invoiceSeries }} nr. {{ order.invoiceNumber }}</strong></div>
+                {% endif %}
                 <div>Comandă #{{ order.id }}</div>
                 <div>Data: {{ order.createdAt|date('d.m.Y') }}</div>
             </td>

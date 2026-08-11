@@ -108,6 +108,9 @@ class OrderCrudController extends AbstractCrudController
             ->hideOnForm()
         ;
         yield NumberField::new('total', 'Total (lei)')->setNumDecimals(2)->hideOnForm();
+        // Atribuit automat la prima emitere a facturii (vezi InvoiceNumberAllocator) —
+        // afișat needitabil, ca reper contabil.
+        yield TextField::new('invoiceLabel', 'Factură')->hideOnForm()->setHelp('Seria + numărul fiscal, atribuit la prima descărcare a facturii.');
         // Setat automat la plasarea comenzii (vezi OrderService::placeOrder) —
         // needitabil aici ca să nu se decupleze de datele billing* de mai jos.
         yield BooleanField::new('isWholesaleOrder', 'Angro')->renderAsSwitch(false)->hideOnForm();
