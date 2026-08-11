@@ -774,8 +774,9 @@ h1 {
 
 .nav-categories__panel {
     min-width: 15rem;
-    max-height: 80vh;
-    overflow-y: auto;
+    /* Fără max-height/overflow: overflow-ul ar tăia flyout-ul lateral al
+       subcategoriilor (poziționat la left:100%) și ar forța scroll. Panoul
+       se extinde dinamic după conținut. */
 }
 
 /* Elementul de submeniu (categorie cu subcategorii). */
