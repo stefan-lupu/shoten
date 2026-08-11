@@ -743,6 +743,108 @@ h1 {
     color: var(--color-text-muted);
 }
 
+/* =========================================================================
+   Meniu categorii (navbar): „Toate categoriile" + flyout subcategorii
+   ========================================================================= */
+
+/* Temă unitară pentru toate dropdown-urile (culorile din --color-*). */
+.dropdown-menu {
+    --bs-dropdown-bg: var(--color-surface);
+    --bs-dropdown-border-color: rgba(var(--color-accent-rgb), .15);
+    --bs-dropdown-link-color: var(--color-text);
+    --bs-dropdown-link-hover-bg: rgba(var(--color-accent-rgb), .12);
+    --bs-dropdown-link-hover-color: var(--color-accent-strong);
+    --bs-dropdown-link-active-bg: var(--color-accent);
+    --bs-dropdown-link-active-color: var(--color-bg);
+    border-radius: var(--ui-radius-sm);
+    box-shadow: var(--ui-shadow-lg);
+}
+
+/* Iconiță „hamburger" desenată din CSS, înaintea textului. */
+.nav-categories__icon {
+    display: inline-block;
+    width: 1.05em;
+    height: .1em;
+    position: relative;
+    vertical-align: middle;
+    margin-right: .15em;
+    background-color: currentColor;
+    box-shadow: 0 .32em 0 currentColor, 0 -.32em 0 currentColor;
+}
+
+.nav-categories__panel {
+    min-width: 15rem;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Elementul de submeniu (categorie cu subcategorii). */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    margin: 0;
+}
+
+.dropdown-submenu__toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.dropdown-submenu__toggle::after {
+    content: "›";
+    font-size: 1.15rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+}
+
+/* --- Desktop (navbar orizontal, ≥768px): deschidere pe hover + flyout lateral --- */
+@media (min-width: 768px) {
+    /* Meniurile din bară se deschid la hover, nu doar la click. Fără spațiu
+       sub declanșator, ca mutarea mouse-ului spre meniu să nu-l închidă. */
+    .navbar-nav > .nav-item.dropdown > .dropdown-menu {
+        margin-top: 0;
+    }
+
+    .navbar-nav > .nav-item.dropdown:hover > .dropdown-menu,
+    .navbar-nav > .nav-item.dropdown:focus-within > .dropdown-menu {
+        display: block;
+    }
+
+    /* Subcategoriile apar lateral, la dreapta părintelui, pe hover. */
+    .dropdown-submenu > .dropdown-menu {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        margin-top: -.4rem;
+        display: none;
+    }
+
+    .dropdown-submenu:hover > .dropdown-menu,
+    .dropdown-submenu:focus-within > .dropdown-menu {
+        display: block;
+    }
+}
+
+/* --- Mobil (meniu colapsat, <768px): subcategoriile apar inline, indentate --- */
+@media (max-width: 767.98px) {
+    .dropdown-submenu > .dropdown-menu {
+        position: static;
+        display: block;
+        border: 0;
+        box-shadow: none;
+        margin: 0;
+        padding-left: .75rem;
+    }
+
+    .dropdown-submenu__toggle::after {
+        display: none;
+    }
+}
+
 /* ---- Footer: separare mai clară ---- */
 footer.container {
     border-top-color: rgba(var(--color-accent-rgb), .15) !important;

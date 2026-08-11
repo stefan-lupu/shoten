@@ -88,22 +88,8 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="main-nav">
-                    <ul class="navbar-nav me-auto">
-                        {% import 'product/_category_menu_items.html.twig' as categoryMenu %}
-                        {% for category in category_repository.findRootCategories %}
-                            {% if category.children is empty %}
-                                <li class="nav-item">
-                                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="nav-link">{{ category.name }}</a>
-                                </li>
-                            {% else %}
-                                <li class="nav-item dropdown">
-                                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ category.name }}</a>
-                                    <ul class="dropdown-menu">
-                                        {{ categoryMenu.items(category.children, 0) }}
-                                    </ul>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
+                    <ul class="navbar-nav me-auto align-items-md-center">
+                        {% include 'product/_category_nav.html.twig' %}
                     </ul>
 
                     <form method="get" action="{{ path('app_product_search') }}" class="d-flex mx-md-3 my-2 my-md-0" role="search">

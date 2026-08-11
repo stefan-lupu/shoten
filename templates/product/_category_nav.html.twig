@@ -1,0 +1,40 @@
+{# Navigația pe categorii din navbar.
+   - „Toate categoriile": dropdown care listează toate categoriile rădăcină;
+     la hover pe una cu subcategorii, se deschide un flyout cu ele (desktop),
+     sau se afișează inline (meniu colapsat pe mobil).
+   - Câteva categorii „featured" (cele cu subcategorii, în ordinea din admin)
+     scoase direct în bară pe ecrane mari, pentru acces rapid. #}
+{% import 'product/_category_menu_items.html.twig' as categoryMenu %}
+{% set roots = category_repository.findRootCategories %}
+{% set featured = roots|filter(c => c.children is not empty)|slice(0, 6) %}
+
+<li class="nav-item dropdown nav-categories">
+    <a href="{{ path('app_home') }}" class="nav-link dropdown-toggle fw-semibold" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+        <span class="nav-categories__icon" aria-hidden="true"></span> Toate categoriile
+    </a>
+    <ul class="dropdown-menu nav-categories__panel">
+        {% for category in roots %}
+            {% if category.children is empty %}
+                <li>
+                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="dropdown-item">{{ category.name }}</a>
+                </li>
+            {% else %}
+                <li class="dropdown-submenu">
+                    <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="dropdown-item dropdown-submenu__toggle">{{ category.name }}</a>
+                    <ul class="dropdown-menu">
+                        {{ categoryMenu.items(category.children, 0) }}
+                    </ul>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</li>
+
+{% for category in featured %}
+    <li class="nav-item dropdown d-none d-lg-block">
+        <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ category.name }}</a>
+        <ul class="dropdown-menu">
+            {{ categoryMenu.items(category.children, 0) }}
+        </ul>
+    </li>
+{% endfor %}
