@@ -284,7 +284,7 @@ class OrderCrudController extends AbstractCrudController
 
     #[AdminRoute(path: '/mark-shipped', name: 'mark_shipped')]
     #[IsGranted('ROLE_ORDERS_MANAGER')]
-    public function markShipped(Request $request, EntityManagerInterface $entityManager, AdminUrlGenerator $adminUrlGenerator): RedirectResponse
+    public function markShipped(Request $request, EntityManagerInterface $entityManager, AdminUrlGenerator $adminUrlGenerator, MailerInterface $mailer, StoreConfig $store): RedirectResponse
     {
         $order = $entityManager->getRepository(Order::class)->find($request->query->get('entityId'));
         if ($order && !$this->isCsrfTokenValid('mark_shipped_'.$order->getId(), $request->query->get('_token'))) {
@@ -292,9 +292,20 @@ class OrderCrudController extends AbstractCrudController
 
             return $this->redirect($adminUrlGenerator->setController(self::class)->setAction(Action::DETAIL)->setEntityId($order->getId())->generateUrl());
         }
-        if ($order) {
+        if ($order && OrderStatus::Shipped !== $order->getStatus()) {
             $order->setStatus(OrderStatus::Shipped);
             $entityManager->flush();
+
+            // Notificăm clientul (inclusiv guest) că a fost expediat, cu numărul
+            // AWB + linkul de urmărire dacă e completat. Ideal, AWB-ul e pus
+            // înainte de marcare; dacă nu, emailul pleacă fără link.
+            $mailer->send((new TemplatedEmail())
+                ->from(new EmailAddress($store->email, $store->name))
+                ->to($order->getContactEmail())
+                ->subject(sprintf('Comanda #%d a fost expediată', $order->getId()))
+                ->htmlTemplate('emails/order_shipped.html.twig')
+                ->context(['order' => $order])
+            );
         }
 
         return $this->redirect($adminUrlGenerator->setController(self::class)->setAction(Action::DETAIL)->setEntityId($order?->getId())->generateUrl());

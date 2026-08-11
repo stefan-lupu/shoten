@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ro">
+    <body>
+        <p>Bună, {{ order.shippingFullName }},</p>
+
+        <p>Comanda ta #{{ order.id }} la <strong>{{ store.name }}</strong> a fost expediată și e pe drum.</p>
+
+        {% if order.trackingNumber %}
+            <p>
+                Număr AWB: <strong>{{ order.trackingNumber }}</strong>
+                {% if store.courierTrackingUrl %}
+                    — <a href="{{ store.courierTrackingUrl|replace({'{awb}': order.trackingNumber}) }}">urmărește coletul</a>
+                {% endif %}
+            </p>
+        {% endif %}
+
+        <p>
+            Livrare la: {{ order.shippingStreet }}, {{ order.shippingCity }},
+            {{ order.shippingCounty }}, {{ order.shippingPostalCode }}.
+        </p>
+
+        <p>Dacă ai întrebări, ne poți scrie la {{ store.email }}.</p>
+
+        <p>Echipa {{ store.name }}</p>
+    </body>
+</html>
