@@ -9,14 +9,17 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Image;
 
 class ProductImageType extends AbstractType
 {
+    private const array ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    private const int MAX_BYTES = 5 * 1024 * 1024;
+
     public function __construct(
         #[Autowire('%kernel.project_dir%/public/images/products')]
         private readonly string $uploadDir,
@@ -28,17 +31,18 @@ class ProductImageType extends AbstractType
         $builder
             // Upload real: fișierul ales e mutat în public/images/products/ și
             // numele generat e salvat în `filename` (vezi listener-ul de mai jos).
+            // NB: fără constrângere declarativă Image aici — ea ar rula la
+            // validare, DUPĂ ce listener-ul mută fișierul, și n-ar mai găsi
+            // fișierul (mutat) → 422. Validăm manual, înainte de mutare.
             ->add('imageFile', FileType::class, [
                 'label' => 'Încarcă imagine',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new Image(maxSize: '5M', mimeTypesMessage: 'Încarcă un fișier imagine valid (jpg, png, webp).'),
-                ],
+                'help' => 'jpg, png, webp sau gif, max 5 MB.',
             ])
             // Rămâne pentru retrocompatibilitate (poți referi un fișier deja
-            // existent) și ca să vezi numele curent la editare. Opțional: dacă
-            // încarci un fișier nou, se completează automat.
+            // existent) și ca să vezi numele curent la editare. Se completează
+            // automat dacă încarci un fișier.
             ->add('filename', TextType::class, [
                 'label' => 'Nume fișier',
                 'required' => false,
@@ -62,14 +66,31 @@ class ProductImageType extends AbstractType
 
             $uploaded = $form->get('imageFile')->getData();
             if ($uploaded instanceof UploadedFile) {
-                $newName = bin2hex(random_bytes(8)).'.'.($uploaded->guessExtension() ?: 'bin');
+                // Validare manuală ÎNAINTE de mutare (fișierul temporar există acum).
+                if (!$uploaded->isValid()) {
+                    $form->get('imageFile')->addError(new FormError('Încărcarea fișierului a eșuat. Încearcă din nou.'));
+
+                    return;
+                }
+                if ($uploaded->getSize() > self::MAX_BYTES) {
+                    $form->get('imageFile')->addError(new FormError('Fișierul e prea mare (max 5 MB).'));
+
+                    return;
+                }
+                if (!\in_array($uploaded->getMimeType(), self::ALLOWED_MIME, true)) {
+                    $form->get('imageFile')->addError(new FormError('Încarcă un fișier imagine valid (jpg, png, webp, gif).'));
+
+                    return;
+                }
+
+                $newName = bin2hex(random_bytes(8)).'.'.($uploaded->guessExtension() ?: 'jpg');
                 $uploaded->move($this->uploadDir, $newName);
                 $image->setFilename($newName);
             }
 
             // O imagine fără fișier încărcat și fără nume e invalidă.
             if (!$image->getFilename()) {
-                $form->addError(new \Symfony\Component\Form\FormError('Încarcă o imagine sau specifică numele fișierului.'));
+                $form->addError(new FormError('Încarcă o imagine sau specifică numele fișierului.'));
             }
         });
     }
