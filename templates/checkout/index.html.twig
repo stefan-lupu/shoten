@@ -6,70 +6,98 @@
     <h1 class="mb-4">Finalizare comandă</h1>
 
     <div class="row g-4">
-        <div class="col-md-7">
+        <div class="col-lg-7">
             {{ form_start(form) }}
                 {% if isGuest %}
-                    <h2 class="h4 mb-3">Datele tale</h2>
-                    {{ form_row(form.guestEmail) }}
-
-                    <h2 class="h4 mt-4">Adresă de livrare</h2>
-                    {{ form_row(form.fullName) }}
-                    {{ form_row(form.phone) }}
-                    {{ form_row(form.county) }}
-                    {{ form_row(form.city) }}
-                    {{ form_row(form.street) }}
-                    {{ form_row(form.postalCode) }}
-
-                    <p class="small text-body-secondary mt-2">
-                        Ai deja cont? <a href="{{ path('app_login') }}">Autentifică-te</a> ca să folosești
-                        adresele salvate și plata cu cardul.
-                    </p>
-                {% else %}
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="h4 mb-0">Adresă de livrare</h2>
-                        <a href="{{ path('app_address_new', { redirect_to: 'checkout' }) }}" class="small">+ Adaugă o adresă nouă</a>
+                    <div class="checkout-section">
+                        <h2 class="h5 checkout-section__title"><span class="checkout-step">1</span> Datele tale</h2>
+                        {{ form_row(form.guestEmail) }}
                     </div>
-                    {{ form_row(form.address) }}
+
+                    <div class="checkout-section">
+                        <h2 class="h5 checkout-section__title"><span class="checkout-step">2</span> Adresă de livrare</h2>
+                        {{ form_row(form.fullName) }}
+                        {{ form_row(form.phone) }}
+                        <div class="row">
+                            <div class="col-sm-6">{{ form_row(form.county) }}</div>
+                            <div class="col-sm-6">{{ form_row(form.city) }}</div>
+                        </div>
+                        {{ form_row(form.street) }}
+                        {{ form_row(form.postalCode) }}
+                        <p class="small text-body-secondary mb-0">
+                            Ai deja cont? <a href="{{ path('app_login') }}">Autentifică-te</a> ca să folosești
+                            adresele salvate și plata cu cardul.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="checkout-section">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="h5 checkout-section__title mb-0"><span class="checkout-step">1</span> Adresă de livrare</h2>
+                            <a href="{{ path('app_address_new', { redirect_to: 'checkout' }) }}" class="small text-nowrap">+ Adresă nouă</a>
+                        </div>
+                        {{ form_row(form.address) }}
+                    </div>
                 {% endif %}
 
-                <h2 class="h4 mt-4">Metodă de plată</h2>
-                {{ form_row(form.paymentMethod) }}
+                <div class="checkout-section">
+                    <h2 class="h5 checkout-section__title"><span class="checkout-step">{{ isGuest ? '3' : '2' }}</span> Metodă de plată</h2>
+                    {{ form_row(form.paymentMethod) }}
+                </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Plasează comanda</button>
+                <button type="submit" class="btn btn-primary btn-lg mt-2">Plasează comanda</button>
             {{ form_end(form) }}
         </div>
 
-        <div class="col-md-5">
-            <div class="card">
+        <div class="col-lg-5">
+            <div class="card order-summary">
                 <div class="card-body">
-                    <h2 class="h4 card-title">Sumar comandă</h2>
-                    <ul class="list-group list-group-flush mb-3">
+                    <h2 class="h5 card-title mb-3">Sumar comandă</h2>
+
+                    <ul class="checkout-items list-unstyled mb-3">
                         {% for item in cart.items %}
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span>{{ item.product.name }} × {{ item.quantity }}</span>
-                                <span>{{ item.subtotal }} lei</span>
+                            <li class="checkout-item">
+                                <span class="checkout-item__media">
+                                    {% if item.product.images is not empty %}
+                                        <img src="{{ asset('images/products/' ~ item.product.images.first.filename) }}" alt="{{ item.product.name }}">
+                                    {% else %}
+                                        <span class="checkout-item__noimg"></span>
+                                    {% endif %}
+                                    <span class="checkout-item__qty">{{ item.quantity }}</span>
+                                </span>
+                                <span class="checkout-item__name">{{ item.product.name }}</span>
+                                <span class="checkout-item__price">{{ item.subtotal }} lei</span>
                             </li>
                         {% endfor %}
                     </ul>
 
                     {% if campaignResult.discounts is not empty %}
-                        <ul class="list-group list-group-flush mb-3">
+                        <ul class="list-unstyled small text-success mb-3">
                             {% for discount in campaignResult.discounts %}
-                                <li class="list-group-item px-0 text-success small">{{ discount.description }}</li>
+                                <li>✓ {{ discount.description }}</li>
                             {% endfor %}
                         </ul>
                     {% endif %}
 
-                    <p class="mb-1">Subtotal: {{ campaignResult.subtotal }} lei</p>
-                    <p class="mb-1">
-                        Transport:
-                        {% if campaignResult.shippingCost == '0.00' %}
-                            <span class="text-success">Gratuit</span>
-                        {% else %}
-                            {{ campaignResult.shippingCost }} lei
-                        {% endif %}
-                    </p>
-                    <p class="fs-5 mb-0">Total: <strong>{{ campaignResult.total }} lei</strong></p>
+                    <dl class="summary-lines mb-0">
+                        <div class="summary-row">
+                            <dt>Subtotal</dt>
+                            <dd>{{ campaignResult.subtotal }} lei</dd>
+                        </div>
+                        <div class="summary-row">
+                            <dt>Transport</dt>
+                            <dd>
+                                {% if campaignResult.shippingCost == '0.00' %}
+                                    <span class="text-success">Gratuit</span>
+                                {% else %}
+                                    {{ campaignResult.shippingCost }} lei
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="summary-row summary-row--total">
+                            <dt>Total</dt>
+                            <dd>{{ campaignResult.total }} lei</dd>
+                        </div>
+                    </dl>
                 </div>
             </div>
         </div>

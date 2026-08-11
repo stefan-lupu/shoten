@@ -356,6 +356,255 @@ h1 {
     border-radius: var(--ui-radius);
 }
 
+/* =========================================================================
+   Coș & checkout
+   ========================================================================= */
+
+/* ---- Coș gol ---- */
+.cart-empty__icon {
+    font-size: 3.5rem;
+    line-height: 1;
+    filter: grayscale(.2);
+}
+
+/* ---- Linii de produs în coș ---- */
+.cart-lines {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+
+.cart-line {
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: .85rem;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(var(--color-accent-rgb), .1);
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-shadow);
+    transition: border-color .25s var(--ui-ease);
+}
+
+.cart-line:hover {
+    border-color: rgba(var(--color-accent-rgb), .3);
+}
+
+.cart-line__media {
+    display: block;
+    width: 84px;
+    height: 84px;
+    border-radius: var(--ui-radius-sm);
+    overflow: hidden;
+    background-color: rgba(var(--color-bg-rgb), .5);
+}
+
+.cart-line__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-line__noimg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: .62rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.cart-line__name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.cart-line__name:hover {
+    color: var(--color-accent-strong);
+}
+
+.cart-line__meta {
+    margin: .1rem 0 .5rem;
+    font-size: .82rem;
+    color: var(--color-text-muted);
+}
+
+.cart-line__qty {
+    display: flex;
+    gap: .4rem;
+    align-items: center;
+}
+
+.cart-line__qty .form-control {
+    width: 4.5rem;
+}
+
+.cart-line__end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .35rem;
+    text-align: right;
+}
+
+.cart-line__subtotal {
+    font-weight: 700;
+    color: var(--color-accent-strong);
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .cart-line {
+        grid-template-columns: 64px 1fr;
+    }
+
+    .cart-line__media {
+        width: 64px;
+        height: 64px;
+    }
+
+    .cart-line__end {
+        grid-column: 2;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+}
+
+/* ---- Card sumar comandă (coș + checkout), lipit la scroll ---- */
+.order-summary {
+    position: sticky;
+    top: 5.5rem;
+}
+
+.summary-lines .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .35rem 0;
+}
+
+.summary-lines dt {
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.summary-lines dd {
+    margin: 0;
+    text-align: right;
+}
+
+.summary-row--total {
+    margin-top: .35rem;
+    padding-top: .75rem;
+    border-top: 1px solid rgba(var(--color-accent-rgb), .18);
+    font-size: 1.2rem;
+}
+
+.summary-row--total dt {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.summary-row--total dd {
+    font-weight: 700;
+    color: var(--color-accent-strong);
+}
+
+/* ---- Secțiuni pas cu pas la checkout ---- */
+.checkout-section {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(var(--color-accent-rgb), .1);
+    border-radius: var(--ui-radius);
+}
+
+.checkout-section__title {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1rem;
+}
+
+.checkout-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    flex: 0 0 1.7rem;
+    font-family: var(--bs-body-font-family);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--color-bg);
+    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent));
+    border-radius: 999px;
+}
+
+/* ---- Mini-linii de produs în sumarul de checkout ---- */
+.checkout-item {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .4rem 0;
+}
+
+.checkout-item + .checkout-item {
+    border-top: 1px solid rgba(var(--color-accent-rgb), .08);
+}
+
+.checkout-item__media {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.checkout-item__media img,
+.checkout-item__noimg {
+    display: block;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--ui-radius-sm);
+    object-fit: cover;
+    background-color: rgba(var(--color-bg-rgb), .5);
+}
+
+.checkout-item__qty {
+    position: absolute;
+    top: -.4rem;
+    right: -.4rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 .3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--color-bg);
+    background-color: var(--color-accent);
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+}
+
+.checkout-item__name {
+    flex: 1 1 auto;
+    font-size: .9rem;
+}
+
+.checkout-item__price {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* ---- Footer: separare mai clară ---- */
 footer.container {
     border-top-color: rgba(var(--color-accent-rgb), .15) !important;

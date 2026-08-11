@@ -6,99 +6,124 @@
     <h1 class="mb-4">Coșul meu</h1>
 
     {% if cart.items is empty %}
-        <p>Coșul este gol. <a href="{{ path('app_home') }}">Vezi produsele</a>.</p>
+        <div class="cart-empty text-center py-5">
+            <div class="cart-empty__icon mb-3">🛒</div>
+            <h2 class="h4">Coșul tău e gol</h2>
+            <p class="text-body-secondary mb-4">Descoperă papetăria noastră japoneză și adaugă primele produse.</p>
+            <a href="{{ path('app_home') }}" class="btn btn-primary">Vezi produsele</a>
+        </div>
     {% else %}
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Produs</th>
-                        <th>Preț unitar</th>
-                        <th>Cantitate</th>
-                        <th>Subtotal</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="cart-lines">
                     {% for item in cart.items %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('app_product_show', { slug: item.product.slug }) }}">{{ item.product.name }}</a>
-                            </td>
-                            <td>{{ item.unitPrice }} lei</td>
-                            <td>
-                                <form method="post" action="{{ path('app_cart_update', { item: item.id }) }}" class="d-flex gap-2">
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" {% if item.product.stockStatus.value == 'in_stock' %}max="{{ item.product.stock }}"{% endif %} class="form-control form-control-sm" style="width: 5rem">
+                        <div class="cart-line">
+                            <a href="{{ path('app_product_show', { slug: item.product.slug }) }}" class="cart-line__media">
+                                {% if item.product.images is not empty %}
+                                    <img src="{{ asset('images/products/' ~ item.product.images.first.filename) }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <span class="cart-line__noimg">Fără imagine</span>
+                                {% endif %}
+                            </a>
+                            <div class="cart-line__info">
+                                <a href="{{ path('app_product_show', { slug: item.product.slug }) }}" class="cart-line__name">{{ item.product.name }}</a>
+                                <p class="cart-line__meta">{{ item.unitPrice }} lei / buc · Origine: {{ item.product.origin }}</p>
+                                <form method="post" action="{{ path('app_cart_update', { item: item.id }) }}" class="cart-line__qty">
+                                    <label class="visually-hidden" for="qty-{{ item.id }}">Cantitate</label>
+                                    <input type="number" id="qty-{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1" {% if item.product.stockStatus.value == 'in_stock' %}max="{{ item.product.stock }}"{% endif %} class="form-control form-control-sm">
                                     <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Actualizează</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Actualizează</button>
                                 </form>
-                            </td>
-                            <td>{{ item.subtotal }} lei</td>
-                            <td>
+                            </div>
+                            <div class="cart-line__end">
+                                <span class="cart-line__subtotal">{{ item.subtotal }} lei</span>
                                 <form method="post" action="{{ path('app_cart_remove', { item: item.id }) }}" data-confirm="Sigur elimini acest produs din coș?">
                                     <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Elimină</button>
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0" aria-label="Elimină {{ item.product.name }}">Elimină</button>
                                 </form>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                </div>
 
-        <div class="card mb-3">
-            <div class="card-body">
-                <h2 class="h5 card-title">Cod promoțional</h2>
-                <form method="post" action="{{ path('app_cart_apply_coupon') }}" class="d-flex gap-2 mb-2">
-                    <input type="text" name="coupon_code" value="{{ appliedCouponCode }}" placeholder="Ex: PRIMAVARA20" class="form-control" style="max-width: 16rem">
-                    <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
-                    <button type="submit" class="btn btn-outline-primary">Aplică</button>
-                    {% if appliedCouponCode %}
-                        <button type="submit" formaction="{{ path('app_cart_remove_coupon') }}" class="btn btn-outline-secondary">Elimină codul</button>
-                    {% endif %}
-                </form>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h2 class="h6 card-title mb-3">Cod promoțional</h2>
+                        <form method="post" action="{{ path('app_cart_apply_coupon') }}" class="d-flex flex-wrap gap-2">
+                            <input type="text" name="coupon_code" value="{{ appliedCouponCode }}" placeholder="Ex: PRIMAVARA20" class="form-control" style="max-width: 16rem">
+                            <input type="hidden" name="_token" value="{{ csrf_token('cart_action') }}">
+                            <button type="submit" class="btn btn-outline-primary">Aplică</button>
+                            {% if appliedCouponCode %}
+                                <button type="submit" formaction="{{ path('app_cart_remove_coupon') }}" class="btn btn-outline-secondary">Elimină codul</button>
+                            {% endif %}
+                        </form>
+                        {% if campaignResult.couponError %}
+                            <div class="alert alert-danger mt-2 mb-0">{{ campaignResult.couponError }}</div>
+                        {% endif %}
+                    </div>
+                </div>
 
-                {% if campaignResult.couponError %}
-                    <div class="alert alert-danger mb-0">{{ campaignResult.couponError }}</div>
-                {% endif %}
+                <a href="{{ path('app_home') }}" class="d-inline-block mt-3 small">← Continuă cumpărăturile</a>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card order-summary">
+                    <div class="card-body">
+                        <h2 class="h5 card-title mb-3">Sumar comandă</h2>
+
+                        {% if campaignResult.discounts is not empty %}
+                            <div class="alert alert-success py-2 px-3 small mb-3">
+                                <strong>Reduceri aplicate:</strong>
+                                <ul class="mb-0 ps-3">
+                                    {% for discount in campaignResult.discounts %}
+                                        <li>{{ discount.description }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <dl class="summary-lines mb-0">
+                            <div class="summary-row">
+                                <dt>Subtotal</dt>
+                                <dd>{{ campaignResult.subtotal }} lei</dd>
+                            </div>
+                            {% if campaignResult.discounts is not empty %}
+                                <div class="summary-row text-success">
+                                    <dt>Reducere</dt>
+                                    <dd>−{{ campaignResult.getTotalDiscount }} lei</dd>
+                                </div>
+                            {% endif %}
+                            <div class="summary-row">
+                                <dt>Transport</dt>
+                                <dd>
+                                    {% if campaignResult.shippingCost == '0.00' %}
+                                        <span class="text-success">Gratuit</span>
+                                    {% else %}
+                                        {{ campaignResult.shippingCost }} lei
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div class="summary-row summary-row--total">
+                                <dt>Total</dt>
+                                <dd>{{ campaignResult.total }} lei</dd>
+                            </div>
+                        </dl>
+
+                        {% if wholesaleMinimumWarning %}
+                            <div class="alert alert-warning mt-3 mb-0 py-2 px-3 small">{{ wholesaleMinimumWarning }}</div>
+                        {% endif %}
+
+                        <a href="{{ path('app_checkout') }}" class="btn btn-primary w-100 mt-3 {{ wholesaleMinimumWarning ? 'disabled' : '' }}">Finalizează comanda</a>
+
+                        {% if not is_granted('ROLE_USER') %}
+                            <p class="small text-body-secondary mt-2 mb-0">
+                                Poți comanda și fără cont. <a href="{{ path('app_login') }}">Autentifică-te</a>
+                                pentru plata cu cardul și adrese salvate.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-
-        {% if campaignResult.discounts is not empty %}
-            <div class="alert alert-success">
-                <strong>Reduceri aplicate:</strong>
-                <ul class="mb-0">
-                    {% for discount in campaignResult.discounts %}
-                        <li>{{ discount.description }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <p class="mb-1">Subtotal: {{ campaignResult.subtotal }} lei</p>
-        {% if campaignResult.discounts is not empty %}
-            <p class="mb-1 text-success">Reducere totală: −{{ campaignResult.getTotalDiscount }} lei</p>
-        {% endif %}
-        <p class="mb-1">
-            Transport:
-            {% if campaignResult.shippingCost == '0.00' %}
-                <span class="text-success">Gratuit</span>
-            {% else %}
-                {{ campaignResult.shippingCost }} lei
-            {% endif %}
-        </p>
-        <p class="fs-5">Total: <strong>{{ campaignResult.total }} lei</strong></p>
-
-        {% if wholesaleMinimumWarning %}
-            <div class="alert alert-warning">{{ wholesaleMinimumWarning }}</div>
-        {% endif %}
-
-        <a href="{{ path('app_checkout') }}" class="btn btn-primary {{ wholesaleMinimumWarning ? 'disabled' : '' }}">Finalizează comanda</a>
-        {% if not is_granted('ROLE_USER') %}
-            <p class="small text-body-secondary mt-2">
-                Poți comanda și fără cont. <a href="{{ path('app_login') }}">Autentifică-te</a>
-                pentru plata cu cardul și adrese salvate.
-            </p>
-        {% endif %}
     {% endif %}
 {% endblock %}
