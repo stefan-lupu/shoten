@@ -73,7 +73,7 @@
                     <span class="text-body-secondary">Fără recenzii încă</span>
                 {% endif %}
             </p>
-            <p class="fs-4 fw-bold mt-3">{{ product.price }} lei</p>
+            <p class="fs-3 fw-bold mt-3" style="color: var(--color-accent-strong)">{{ product.price }} lei</p>
 
             {% if is_granted('ROLE_WHOLESALE') and product.wholesaleTiers is not empty %}
                 <table class="table table-sm w-auto">

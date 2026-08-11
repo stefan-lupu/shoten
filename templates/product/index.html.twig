@@ -1,7 +1,25 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1 class="mb-4">Produse recente</h1>
+    <section class="hero">
+        <p class="section-eyebrow mb-2">Made in Japan</p>
+        <h1 class="hero__title">
+            {{ store.name }}<span class="accent">.</span>
+        </h1>
+        <p class="hero__lead">
+            {{ store.slogan ?: store.defaultMetaDescription }}
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            {% for category in category_repository.findRootCategories|slice(0, 4) %}
+                <a href="{{ path('app_category_show', { slug: category.slug }) }}" class="btn btn-outline-primary btn-sm">{{ category.name }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="section-title">
+        <p class="section-eyebrow">Noutăți</p>
+        <h2 class="mb-0">Produse recente</h2>
+    </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for product in products %}
