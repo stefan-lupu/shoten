@@ -56,14 +56,19 @@
 
     <div class="row g-4">
         <div class="col-md-6">
-            {% for image in product.images %}
-                <img src="{{ asset('images/products/' ~ image.filename) }}" alt="{{ product.name }}" class="img-fluid rounded">
-            {% else %}
-                <div class="bg-body-tertiary rounded d-flex align-items-center justify-content-center text-body-secondary" style="aspect-ratio: 1; min-height: 240px">Fără imagine</div>
-            {% endfor %}
+            <div class="{% if product.isCurrentlyPromoted %}product-media--promoted{% endif %}">
+                {% for image in product.images %}
+                    <img src="{{ asset('images/products/' ~ image.filename) }}" alt="{{ product.name }}" class="img-fluid rounded">
+                {% else %}
+                    <div class="bg-body-tertiary rounded d-flex align-items-center justify-content-center text-body-secondary" style="aspect-ratio: 1; min-height: 240px">Fără imagine</div>
+                {% endfor %}
+            </div>
         </div>
 
         <div class="col-md-6">
+            {% if product.isCurrentlyPromoted %}
+                <span class="badge promoted-badge mb-2">★ Produs promovat</span>
+            {% endif %}
             <h1>{{ product.name }}</h1>
             {% include 'product/_stock_badge.html.twig' %}
             <p class="mt-2 mb-0">

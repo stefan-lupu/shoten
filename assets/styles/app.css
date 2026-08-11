@@ -314,6 +314,48 @@ h1 {
     letter-spacing: .02em;
 }
 
+/* ---- Produse promovate: chenar auriu + panglică ---- */
+.card--promoted {
+    position: relative;
+    border-color: rgba(var(--color-accent-rgb), .55);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), .35), var(--ui-shadow);
+}
+
+.card--promoted:hover {
+    border-color: var(--color-accent-strong) !important;
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), .5), var(--ui-shadow-lg) !important;
+}
+
+.promoted-ribbon {
+    position: absolute;
+    top: .75rem;
+    left: .75rem;
+    z-index: 2;
+    padding: .18rem .55rem;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--color-bg);
+    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent));
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+
+.promoted-badge {
+    color: var(--color-bg);
+    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent));
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+/* Imaginea produsului promovat pe pagina de detaliu — chenar auriu. */
+.product-media--promoted img,
+.product-media--promoted > div {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 12px 30px -10px rgba(var(--color-accent-rgb), .4);
+    border-radius: var(--ui-radius);
+}
+
 /* ---- Footer: separare mai clară ---- */
 footer.container {
     border-top-color: rgba(var(--color-accent-rgb), .15) !important;

@@ -67,6 +67,21 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
+    /**
+     * Produs promovat: are prioritate în căutări/listări și un chenar auriu.
+     * Perioada e opțională — dacă lipsește, e promovat cât timp e bifat. La
+     * expirarea `promotedUntil`, flagul e debifat automat de comanda
+     * app:expire-promotions; `isCurrentlyPromoted()` respectă oricum fereastra.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isPromoted = false;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $promotedFrom = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $promotedUntil = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -242,6 +257,65 @@ class Product
         $this->category = $category;
 
         return $this;
+    }
+
+    public function isPromoted(): bool
+    {
+        return $this->isPromoted;
+    }
+
+    public function setIsPromoted(bool $isPromoted): static
+    {
+        $this->isPromoted = $isPromoted;
+
+        return $this;
+    }
+
+    public function getPromotedFrom(): ?\DateTimeImmutable
+    {
+        return $this->promotedFrom;
+    }
+
+    public function setPromotedFrom(?\DateTimeImmutable $promotedFrom): static
+    {
+        $this->promotedFrom = $promotedFrom;
+
+        return $this;
+    }
+
+    public function getPromotedUntil(): ?\DateTimeImmutable
+    {
+        return $this->promotedUntil;
+    }
+
+    public function setPromotedUntil(?\DateTimeImmutable $promotedUntil): static
+    {
+        $this->promotedUntil = $promotedUntil;
+
+        return $this;
+    }
+
+    /**
+     * True dacă produsul e promovat ACUM: flagul e bifat și suntem în
+     * fereastra promotedFrom..promotedUntil (limitele lipsă = fără limită).
+     * Toată logica de afișare/prioritizare folosește asta, ca o promovare
+     * expirată să nu mai apară promovată chiar înainte să ruleze cron-ul.
+     */
+    public function isCurrentlyPromoted(): bool
+    {
+        if (!$this->isPromoted) {
+            return false;
+        }
+
+        $now = new \DateTimeImmutable();
+        if (null !== $this->promotedFrom && $now < $this->promotedFrom) {
+            return false;
+        }
+        if (null !== $this->promotedUntil && $now > $this->promotedUntil) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

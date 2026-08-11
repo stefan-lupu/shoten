@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -73,6 +74,13 @@ class ProductCrudController extends AbstractCrudController
         yield IntegerField::new('stock', 'Stoc')->setHelp('Relevant doar pentru „În stoc”.');
         yield IntegerField::new('estimatedDays', 'Zile estimate')->setHelp('Relevant doar pentru „La comandă”.')->hideOnIndex();
         yield NumberField::new('price', 'Preț (lei)')->setNumDecimals(2)->setFormTypeOption('disabled', !$canEditAll);
+        yield BooleanField::new('isPromoted', 'Promovat')
+            ->renderAsSwitch(Crud::PAGE_INDEX !== $pageName)
+            ->setFormTypeOption('disabled', !$canEditAll)
+            ->setHelp('Prioritate în căutări/listări + chenar auriu. La expirarea perioadei se debifează automat.')
+        ;
+        yield DateTimeField::new('promotedFrom', 'Promovat de la')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll)->setHelp('Opțional. Gol = de acum.');
+        yield DateTimeField::new('promotedUntil', 'Promovat până la')->setRequired(false)->hideOnIndex()->setFormTypeOption('disabled', !$canEditAll)->setHelp('Opțional. Gol = fără limită.');
         yield TextField::new('origin', 'Origine')->setFormTypeOption('disabled', !$canEditAll);
         yield TextField::new('internalCode', 'Cod intern')->setRequired(false)->setFormTypeOption('disabled', !$canEditAll);
         yield TextField::new('externalCode', 'Cod extern')->setRequired(false)->setFormTypeOption('disabled', !$canEditAll);

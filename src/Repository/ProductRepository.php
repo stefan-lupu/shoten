@@ -38,7 +38,8 @@ class ProductRepository extends ServiceEntityRepository
             ->join('p.category', 'c')
             ->andWhere('c.slug = :slug')
             ->setParameter('slug', $slug)
-            ->orderBy('p.name', 'ASC')
+            ->orderBy('p.isPromoted', 'DESC')
+            ->addOrderBy('p.name', 'ASC')
             ->getQuery()
             ->getResult()
         ;
@@ -51,8 +52,10 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findFeatured(int $limit): array
     {
+        // Produsele promovate apar primele pe homepage, apoi cele mai recente.
         return $this->createQueryBuilder('p')
-            ->orderBy('p.createdAt', 'DESC')
+            ->orderBy('p.isPromoted', 'DESC')
+            ->addOrderBy('p.createdAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult()
@@ -98,7 +101,9 @@ class ProductRepository extends ServiceEntityRepository
     private function applySort(QueryBuilder $qb, ?string $sort): void
     {
         [$field, $direction] = self::SORT_OPTIONS[$sort] ?? self::SORT_OPTIONS['name'];
-        $qb->orderBy($field, $direction);
+        // Produsele promovate au prioritate — apar primele, indiferent de
+        // sortarea aleasă, care rămâne criteriul secundar.
+        $qb->orderBy('p.isPromoted', 'DESC')->addOrderBy($field, $direction);
     }
 
     private function applyPriceRange(QueryBuilder $qb, ?string $minPrice, ?string $maxPrice): void
