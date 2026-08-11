@@ -19,9 +19,28 @@ class Order
     #[ORM\Column]
     private ?int $id = null;
 
+    // Nullable: comenzile ca vizitator (guest checkout) nu au cont. Pentru
+    // ele, contactul e `guestEmail` de mai jos; numele/adresa de livrare stau
+    // oricum în snapshot-ul shipping* de mai jos, la fel ca la comenzile cu cont.
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
+
+    /**
+     * Emailul de contact pentru comenzile fără cont (guest checkout). La
+     * comenzile cu cont e null (se folosește emailul contului). Vezi
+     * getContactEmail().
+     */
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $guestEmail = null;
+
+    /**
+     * Token aleator pentru accesul public la pagina de confirmare a unei
+     * comenzi guest (care nu se poate autentifica să vadă /cont/comenzi).
+     * Null pentru comenzile cu cont.
+     */
+    #[ORM\Column(length: 64, nullable: true, unique: true)]
+    private ?string $guestToken = null;
 
     // Adresa de livrare e copiată (snapshot) la plasarea comenzii, ca să nu
     // se schimbe retroactiv dacă userul își editează adresa salvată ulterior.
@@ -175,6 +194,40 @@ class Order
         $this->user = $user;
 
         return $this;
+    }
+
+    public function getGuestEmail(): ?string
+    {
+        return $this->guestEmail;
+    }
+
+    public function setGuestEmail(?string $guestEmail): static
+    {
+        $this->guestEmail = $guestEmail;
+
+        return $this;
+    }
+
+    public function getGuestToken(): ?string
+    {
+        return $this->guestToken;
+    }
+
+    public function setGuestToken(?string $guestToken): static
+    {
+        $this->guestToken = $guestToken;
+
+        return $this;
+    }
+
+    /**
+     * Emailul unde se trimit notificările pentru această comandă: al contului
+     * dacă e cu cont, altfel emailul de guest. Toate emailurile de comandă
+     * trec prin această metodă, ca să funcționeze și pentru comenzile guest.
+     */
+    public function getContactEmail(): ?string
+    {
+        return $this->user?->getEmail() ?? $this->guestEmail;
     }
 
     public function getShippingFullName(): ?string

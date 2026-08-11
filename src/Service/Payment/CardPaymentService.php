@@ -116,7 +116,7 @@ final class CardPaymentService
     {
         $email = (new TemplatedEmail())
             ->from(new EmailAddress($this->store->email, $this->store->name))
-            ->to($order->getUser()->getEmail())
+            ->to($order->getContactEmail())
             ->subject(sprintf('Plata pentru comanda #%d a fost confirmată', $order->getId()))
             ->htmlTemplate('emails/payment_confirmed.html.twig')
             ->context(['order' => $order])

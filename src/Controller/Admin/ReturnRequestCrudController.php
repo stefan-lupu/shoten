@@ -154,7 +154,7 @@ class ReturnRequestCrudController extends AbstractCrudController
                 $order = $returnRequest->getOrder();
                 $mailer->send((new TemplatedEmail())
                     ->from(new EmailAddress($store->email, $store->name))
-                    ->to($order->getUser()->getEmail())
+                    ->to($order->getContactEmail())
                     ->subject(sprintf('Cererea de retur pentru comanda #%d a fost %s', $order->getId(), $approved ? 'aprobată' : 'respinsă'))
                     ->htmlTemplate($approved ? 'emails/return_approved.html.twig' : 'emails/return_rejected.html.twig')
                     ->context(['order' => $order, 'returnRequest' => $returnRequest])

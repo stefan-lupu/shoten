@@ -59,7 +59,7 @@ class OrderCrudController extends AbstractCrudController
             ->setEntityLabelInPlural('Comenzi')
             ->setDefaultSort(['createdAt' => 'DESC'])
             // Include emailul clientului (asociația user), nu doar coloanele proprii ale comenzii.
-            ->setSearchFields(['id', 'shippingFullName', 'shippingPhone', 'trackingNumber', 'user.email'])
+            ->setSearchFields(['id', 'shippingFullName', 'shippingPhone', 'trackingNumber', 'user.email', 'guestEmail'])
         ;
     }
 
@@ -67,6 +67,8 @@ class OrderCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->hideOnForm();
         yield AssociationField::new('user', 'Client')->hideOnForm();
+        // Comenzile guest nu au cont — emailul de contact e aici. Gol la comenzile cu cont.
+        yield TextField::new('guestEmail', 'Email (guest)')->hideOnForm();
         yield ChoiceField::new('status', 'Status')
             ->setChoices([
                 'În așteptare' => OrderStatus::Pending,
@@ -269,7 +271,7 @@ class OrderCrudController extends AbstractCrudController
 
             $email = (new TemplatedEmail())
                 ->from(new EmailAddress($store->email, $store->name))
-                ->to($order->getUser()->getEmail())
+                ->to($order->getContactEmail())
                 ->subject(sprintf('Plata pentru comanda #%d a fost confirmată', $order->getId()))
                 ->htmlTemplate('emails/payment_confirmed.html.twig')
                 ->context(['order' => $order])

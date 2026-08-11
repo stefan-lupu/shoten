@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Comandă confirmată — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <div class="mx-auto" style="max-width: 40rem">
+        <h1 class="mb-3">Mulțumim pentru comandă!</h1>
+
+        <div class="alert alert-success">
+            Comanda <strong>#{{ order.id }}</strong> a fost înregistrată. Ți-am trimis
+            un email de confirmare la <strong>{{ order.guestEmail }}</strong>.
+        </div>
+
+        <h2 class="h5">Rezumat</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Produs</th>
+                        <th class="text-end">Cantitate</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.productName }}</td>
+                            <td class="text-end">{{ item.quantity }}</td>
+                            <td class="text-end">{{ item.subtotal }} lei</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="mb-1">Transport: {{ order.shippingCost == '0.00' ? 'Gratuit' : (order.shippingCost ~ ' lei') }}</p>
+        <p class="fs-5">Total: <strong>{{ order.total }} lei</strong></p>
+
+        <p class="mb-1">Livrare la: {{ order.shippingFullName }}, {{ order.shippingStreet }}, {{ order.shippingCity }}, {{ order.shippingCounty }}, {{ order.shippingPostalCode }}, tel. {{ order.shippingPhone }}</p>
+        <p>Metodă de plată: {{ order.paymentMethod.value == 'cod' ? 'Ramburs la livrare' : 'Transfer bancar' }}</p>
+
+        <p class="text-body-secondary small mt-4">
+            Păstrează acest link — e singura cale de a revedea comanda fără cont.
+            Pentru istoric și retururi mai simple, îți poți crea oricând un cont
+            cu aceeași adresă de email.
+        </p>
+
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Înapoi la magazin</a>
+    </div>
+{% endblock %}

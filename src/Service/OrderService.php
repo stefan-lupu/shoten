@@ -35,7 +35,7 @@ final class OrderService
     /**
      * @throws InsufficientStockException
      */
-    public function placeOrder(User $user, Cart $cart, CheckoutData $data, ?string $couponCode = null): Order
+    public function placeOrder(?User $user, Cart $cart, CheckoutData $data, ?string $couponCode = null): Order
     {
         if ($cart->getItems()->isEmpty()) {
             throw new \DomainException('Coșul este gol.');
@@ -82,12 +82,12 @@ final class OrderService
             // sau o șterge ulterior, istoricul comenzii rămâne neschimbat.
             $order = (new Order())
                 ->setUser($user)
-                ->setShippingFullName($data->address->getFullName())
-                ->setShippingPhone($data->address->getPhone())
-                ->setShippingCounty($data->address->getCounty())
-                ->setShippingCity($data->address->getCity())
-                ->setShippingStreet($data->address->getStreet())
-                ->setShippingPostalCode($data->address->getPostalCode())
+                ->setShippingFullName($data->shippingFullName())
+                ->setShippingPhone($data->shippingPhone())
+                ->setShippingCounty($data->shippingCounty())
+                ->setShippingCity($data->shippingCity())
+                ->setShippingStreet($data->shippingStreet())
+                ->setShippingPostalCode($data->shippingPostalCode())
                 ->setStatus(OrderStatus::Pending)
                 ->setPaymentMethod($data->paymentMethod)
                 ->setPaymentStatus(PaymentStatus::Pending)
@@ -96,12 +96,20 @@ final class OrderService
                 ->setCouponCode($couponCode ?: null)
             ;
 
+            // Comandă guest (fără cont): reținem emailul de contact și un token
+            // aleator pentru pagina publică de confirmare (guestul nu poate
+            // accesa /cont ca să-și vadă comanda).
+            if (null === $user) {
+                $order->setGuestEmail($data->guestEmail);
+                $order->setGuestToken(bin2hex(random_bytes(16)));
+            }
+
             // Snapshot al datelor firmei la momentul comenzii, la fel ca
             // adresa de livrare de mai sus — vezi tasks/17-checkout-facturare-angro.md.
             // Verificăm prin RoleHierarchyInterface (nu User::getRoles() direct),
             // ca un ROLE_ADMIN care moștenește ROLE_WHOLESALE să fie tratat identic
             // cu un cont angro aprobat (aceeași convenție ca WholesalePricingResolver).
-            if (\in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
+            if (null !== $user && \in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
                 $order
                     ->setIsWholesaleOrder(true)
                     ->setBillingCompanyName($user->getCompanyName())
@@ -169,9 +177,10 @@ final class OrderService
      * sau null dacă totul e în regulă. Metodă publică refolosită și de
      * CartController pentru un mesaj informativ înainte de checkout.
      */
-    public function wholesaleMinimumError(User $user, Cart $cart, string $subtotal): ?string
+    public function wholesaleMinimumError(?User $user, Cart $cart, string $subtotal): ?string
     {
-        if (!\in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
+        // Comenzile guest nu sunt niciodată angro — nu au cont, deci nici rol.
+        if (null === $user || !\in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
             return null;
         }
 
@@ -263,7 +272,7 @@ final class OrderService
     {
         $email = (new TemplatedEmail())
             ->from(new EmailAddress($this->store->email, $this->store->name))
-            ->to($order->getUser()->getEmail())
+            ->to($order->getContactEmail())
             ->subject(sprintf('Comanda #%d a fost anulată', $order->getId()))
             ->htmlTemplate('emails/order_cancelled.html.twig')
             ->context(['order' => $order, 'wasRefunded' => $wasRefunded])
@@ -276,7 +285,7 @@ final class OrderService
     {
         $email = (new TemplatedEmail())
             ->from(new EmailAddress($this->store->email, $this->store->name))
-            ->to($order->getUser()->getEmail())
+            ->to($order->getContactEmail())
             ->subject(sprintf('Comanda ta la %s a fost înregistrată', $this->store->name))
             ->htmlTemplate('emails/order_confirmation.html.twig')
             ->context(['order' => $order])
