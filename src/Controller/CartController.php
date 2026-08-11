@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\CartItem;
 use App\Entity\Product;
+use App\Entity\User;
 use App\Exception\InsufficientStockException;
 use App\Service\CampaignEngine;
 use App\Service\CartManager;
+use App\Service\OrderService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,16 +21,25 @@ final class CartController extends AbstractController
     public const string COUPON_SESSION_KEY = 'cart_coupon_code';
 
     #[Route('/cos', name: 'app_cart', methods: ['GET'])]
-    public function show(Request $request, CartManager $cartManager, CampaignEngine $campaignEngine): Response
+    public function show(Request $request, CartManager $cartManager, CampaignEngine $campaignEngine, OrderService $orderService): Response
     {
         $cart = $cartManager->getCurrentCart();
         $couponCode = $request->getSession()->get(self::COUPON_SESSION_KEY);
         $campaignResult = $campaignEngine->applyCampaigns($cart, $couponCode);
 
+        // Avertisment informativ pentru clienții angro care nu ating încă
+        // pragul minim — ca să nu fie surprinși abia la plasarea comenzii
+        // (null pentru retail sau când pragul e atins).
+        $user = $this->getUser();
+        $wholesaleMinimumWarning = $user instanceof User && !$cart->getItems()->isEmpty()
+            ? $orderService->wholesaleMinimumError($user, $cart, $campaignResult->subtotal)
+            : null;
+
         return $this->render('cart/index.html.twig', [
             'cart' => $cart,
             'campaignResult' => $campaignResult,
             'appliedCouponCode' => $couponCode,
+            'wholesaleMinimumWarning' => $wholesaleMinimumWarning,
         ]);
     }
 

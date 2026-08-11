@@ -6,6 +6,7 @@ use App\Dto\CheckoutData;
 use App\Entity\User;
 use App\Enum\PaymentMethod;
 use App\Exception\InsufficientStockException;
+use App\Exception\WholesaleMinimumNotMetException;
 use App\Form\CheckoutType;
 use App\Repository\AddressRepository;
 use App\Service\CampaignEngine;
@@ -68,6 +69,12 @@ final class CheckoutController extends AbstractController
                 return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
             } catch (InsufficientStockException $e) {
                 $this->addFlash('error', $e->getMessage());
+            } catch (WholesaleMinimumNotMetException $e) {
+                // Comanda nu atinge pragul minim angro — înapoi la coș, unde
+                // clientul poate ajusta cantitățile (vezi mesajul informativ).
+                $this->addFlash('error', $e->getMessage());
+
+                return $this->redirectToRoute('app_cart');
             }
         }
 

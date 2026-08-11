@@ -11,6 +11,8 @@ use App\Enum\OrderStatus;
 use App\Enum\PaymentStatus;
 use App\Enum\StockStatus;
 use App\Exception\InsufficientStockException;
+use App\Exception\WholesaleMinimumNotMetException;
+use App\Repository\ShippingSettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
@@ -26,6 +28,7 @@ final class OrderService
         private readonly StoreConfig $store,
         private readonly CampaignEngine $campaignEngine,
         private readonly RoleHierarchyInterface $roleHierarchy,
+        private readonly ShippingSettingsRepository $shippingSettingsRepository,
     ) {
     }
 
@@ -42,6 +45,11 @@ final class OrderService
         // rezultatul (inclusiv cadourile BOGO auto-incluse) să fie identic
         // cu ce a validat verificarea de stoc de mai jos.
         $campaignResult = $this->campaignEngine->applyCampaigns($cart, $couponCode);
+
+        $minimumError = $this->wholesaleMinimumError($user, $cart, $campaignResult->subtotal);
+        if (null !== $minimumError) {
+            throw new WholesaleMinimumNotMetException($minimumError);
+        }
 
         foreach ($cart->getItems() as $item) {
             $product = $item->getProduct();
@@ -149,6 +157,51 @@ final class OrderService
 
             return $order;
         });
+    }
+
+    /**
+     * Verifică pragurile minime (valoare și/sau bucăți) care se aplică DOAR
+     * comenzilor angro — un client retail nu e afectat niciodată. Valoarea
+     * comparată e subtotalul (valoarea produselor, fără transport). Praguri
+     * null în ShippingSettings = fără restricție.
+     *
+     * Întoarce mesajul de eroare (pentru afișare) dacă un prag nu e atins,
+     * sau null dacă totul e în regulă. Metodă publică refolosită și de
+     * CartController pentru un mesaj informativ înainte de checkout.
+     */
+    public function wholesaleMinimumError(User $user, Cart $cart, string $subtotal): ?string
+    {
+        if (!\in_array('ROLE_WHOLESALE', $this->roleHierarchy->getReachableRoleNames($user->getRoles()), true)) {
+            return null;
+        }
+
+        $settings = $this->shippingSettingsRepository->getSettings();
+
+        $minValue = $settings->getWholesaleMinOrderValue();
+        if (null !== $minValue && bccomp($subtotal, $minValue, 2) < 0) {
+            return sprintf(
+                'Comanda minimă pentru conturi angro este de %s lei. Subtotalul tău este %s lei.',
+                $minValue,
+                $subtotal,
+            );
+        }
+
+        $minItems = $settings->getWholesaleMinOrderItems();
+        if (null !== $minItems) {
+            $totalItems = 0;
+            foreach ($cart->getItems() as $item) {
+                $totalItems += $item->getQuantity();
+            }
+            if ($totalItems < $minItems) {
+                return sprintf(
+                    'Comanda minimă pentru conturi angro este de %d bucăți. În coș ai %d.',
+                    $minItems,
+                    $totalItems,
+                );
+            }
+        }
+
+        return null;
     }
 
     /**

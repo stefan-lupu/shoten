@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -46,6 +47,15 @@ class ShippingSettingsCrudController extends AbstractCrudController
             ->setNumDecimals(2)
             ->setRequired(false)
             ->setHelp('Comenzile cu subtotal peste această valoare au transport gratuit. Gol = niciodată gratuit.')
+        ;
+        yield NumberField::new('wholesaleMinOrderValue', 'Comandă minimă angro (lei)')
+            ->setNumDecimals(2)
+            ->setRequired(false)
+            ->setHelp('Valoarea minimă (subtotal) a unei comenzi plasate de un cont angro. Gol = fără prag. Nu afectează clienții retail.')
+        ;
+        yield IntegerField::new('wholesaleMinOrderItems', 'Comandă minimă angro (bucăți)')
+            ->setRequired(false)
+            ->setHelp('Numărul minim total de bucăți dintr-o comandă angro. Gol = fără prag. Nu afectează clienții retail.')
         ;
     }
 }
